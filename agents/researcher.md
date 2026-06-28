@@ -7,6 +7,7 @@ steps: 30
 permission:
   lsp:
     '*': deny
+    'lsp_status': allow
     'lsp_diagnostics': allow
     'lsp_symbols': allow
     'lsp_goto_definition': allow
@@ -15,6 +16,11 @@ permission:
     '*': deny
     'reports/*': allow
     'docs/research/*': allow
+  task:
+    '*': deny
+    'oracle': allow
+    'momus': allow
+    'sisyphus-junior': allow
   bash:
     '*': deny
     'git status*': allow
@@ -130,23 +136,37 @@ color: '#4A90D9'
 2. 返回部分可解析 → 提取可解析部分作为有效结论，报告解析失败部分
 3. 返回完全可解析但内容与预期矛盾 → 必须接受为有效结论，不得标记为异常
 
-**工具选择决策**：收录存在选择不确定性的场景——通用基础工具（`read` 读文件、`glob` 找文件）无需决策指引，不重复列出。
+**工具选择决策**：收录存在选择不确定性的场景——通用基础工具（`read` 读文件、`glob` 找文件、`look_at` 非文本摘要）和单选项场景无需决策指引，不列出。
 
-| 场景                       | 首选工具         | 说明                                      |
-| -------------------------- | ---------------- | ----------------------------------------- |
-| 代码结构/调用关系/架构理解 | `codegraph`      | 一次调用覆盖多文件，优于逐个 grep+read    |
-| 文本/模式匹配定位          | `grep`           | 全项目文本搜索                            |
-| 搜索未知信息               | `websearch`      | 搜索引擎查找信息                          |
-| 读取已知 URL 内容          | `webfetch`       | 已有明确 URL 时直接获取，区别于 websearch |
-| 大规模代码库探索           | Explore 子代理   | 需要跨多文件/多路径收集证据时             |
-| 文档/知识检索              | Librarian 子代理 | 需要查官方文档、学术文献、外部知识时      |
-| 数据分析/统计验证          | Sisyphus-Junior  | 临时性验证脚本，不进入项目代码库          |
-| 压力测试结论               | Oracle 子代理    | 找反例、隐藏假设、失效场景                |
-| 审查分析质量               | Momus 子代理     | 找逻辑漏洞、幸存者偏差、更简单解释        |
+**能力边界**：Researcher 定位是理解与分析，不是执行与观测。运行时行为调查（启动系统、触发负载、观察输出）超出能力范围——遇此场景应声明 `needs more information` 并请求用户提供日志/复现数据，或转交实现代理。
 
-并行原则：Explore、Librarian、Oracle、Momus 之间无依赖时可并行调用。
+| 场景                       | 首选工具                      | 说明                                                                                                                                                                   |
+| -------------------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 代码结构/调用关系/架构理解 | `codegraph`                   | 一次调用覆盖多文件源码+调用路径；调用关系和接口实现查找在当前可用工具中无替代方案                                                                                      |
+| 符号级语义分析             | LSP 子工具                    | `lsp_goto_definition`/`lsp_find_references`/`lsp_symbols`/`lsp_diagnostics`：符号定义、引用追踪、类型推断、错误诊断；比 codegraph 名称匹配更精确（区分重载、泛型特化） |
+| 文本/模式匹配定位          | `grep`                        | 全项目文本搜索；codegraph 不索引注释/配置/文档等非代码内容，这些场景必须用 `grep`                                                                                      |
+| 代码历史意图               | `git log`/`git blame`         | 理解"为什么这样写"而非"做了什么"；git 命令提供历史因果（变更动机），codegraph 提供结构因果（调用关系）——问题指向意图时选 git                                           |
+| 搜索未知信息               | `websearch`                   | 搜索引擎查找通用信息、概念、教程、新闻                                                                                                                                 |
+| 跨仓库代码实践搜索         | `grep_app`                    | 搜索 GitHub 上真实代码用法模式、API 使用示例、验证某实践是否被广泛采用；与 `websearch` 互补（代码 vs 通用信息）                                                        |
+| 读取已知 URL 内容          | `webfetch`                    | 已有明确 URL 时直接获取，区别于 websearch                                                                                                                              |
+| 库 API / 特定库文档查询    | `context7`                    | 已知库名 + 具体 API 问题，从源码提取精确用法示例和版本信息；无该库时 fallback 到 `websearch` + `webfetch`                                                              |
+| 大规模代码库探索           | Explore（`call_omo_agent`）   | 需要跨多文件/多路径收集证据时                                                                                                                                          |
+| 大规模多方向搜索           | Librarian（`call_omo_agent`） | 需要多方向并行搜索且上下文隔离更有利时。原因：上下文隔离、可并行、模型分离                                                                                             |
+| 数据分析/统计验证          | Sisyphus-Junior（`task`）     | 临时性验证脚本，不进入项目代码库                                                                                                                                       |
+| 压力测试结论               | Oracle（`task`）              | 找反例、隐藏假设、失效场景                                                                                                                                             |
+| 审查分析质量               | Momus（`task`）               | 找逻辑漏洞、幸存者偏差、更简单解释                                                                                                                                     |
 
-`codegraph` 子工具选择：`codegraph_explore` 主工具，大多数场景首选；`codegraph_search` 只需符号位置时用（更快但不返回代码）；`codegraph_node` 读取单个符号/文件并附带调用关系；`codegraph_callers` 查找谁调用了某符号。
+**LSP 与 codegraph 分工**：LSP 精确于符号定义/引用（类型系统语义），codegraph 强于调用关系/架构理解（多文件关联）；两者互补。
+
+**源可信度后置评估**：工具选择本身不区分来源 tier——先选择合适工具获取结果，再对结果应用 source-critique 评估可信度。若来源 tier 不满足 RESEARCH BUDGET 要求，追加搜索补充更高 tier 来源。
+
+**跨域证据合成策略**：当问题同时涉及代码理解和外部知识（如"代码是否遵循某规范"），并行调用不同类别工具（codegraph 理解代码 + context7/webfetch 获取规范），然后结构化比较两方证据。合成是方法论层面的组合操作，不是单工具映射。
+
+**Fallback 规则**：首选工具不可用时按以下路径降级——`codegraph` 未索引 → `grep` + `read`；LSP 子工具不可用 → `codegraph_search` + `codegraph_node`；`context7` 无该库 → `websearch` + `webfetch`；`webfetch` 被阻止 → `websearch` 换来源或 Librarian 子代理。
+
+**子代理 vs 直接工具**：当任务处于边界时，按两个标准判断——(1) 工具调用次数：预期 >5 次同类型调用则子代理更高效；(2) 上下文占用：搜索结果体积大且不需要全部保留在主窗口则用子代理隔离。不满足任一条件时用直接工具。
+
+**常见工具链**：`codegraph_search` → `codegraph_explore`（先定位再理解）；`codegraph_explore` → `grep` 验证（结构理解后文本级验证）；`grep_app` → `context7`（实践模式 → 官方文档）；`websearch`/Librarian → `codegraph`/`grep`（外部知识 → 内部验证）；`websearch` → `webfetch`（先定位再获取——已知需要某信息但 URL 不明时）；codegraph + webfetch/context7（跨域合成——代码理解与外部规范对比）。
 
 ### SKILL TRIGGERS
 
@@ -156,7 +176,7 @@ color: '#4A90D9'
 
 Skill 使用声明：分析结束时附带轻量声明——使用了哪些 skill、未使用但可能相关的 skill、选择理由。格式：
 
-```
+```text
 Skill Resolution: [used] skill-a, skill-b | [considered but not used] skill-c (reason)
 ```
 
