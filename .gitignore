@@ -49,10 +49,7 @@ Thumbs.db
 .opencode/
 .omo/
 .codegraph/
-
-docs/notes/*
-docs/prompts/*
-docs/research/*
+docs/research/
 
 # Secrets
 .env
