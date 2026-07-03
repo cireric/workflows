@@ -25,8 +25,7 @@ typecheck: ## Run mypy type checker
 test: ## Run pytest
 	$(VENV)/bin/pytest
 
-clean: ## Remove venv and cache
-	rm -rf $(VENV)
+clean: ## Remove cache
 	rm -rf .mypy_cache .ruff_cache .pytest_cache .coverage htmlcov
 
 help: ## Show this help
