@@ -61,3 +61,17 @@ tests/        # 测试
 - 禁止提交 `.env` 文件（仅提交 `.env.example`）
 - 禁止提交 IDE 配置（`.idea/`、`.vscode/`）
 - 修改 `agents/` 或 `skills/` 下的 Markdown 文件后，运行 `make test` 确认结构测试通过
+
+## Agent skills
+
+### Issue tracker
+
+Issues tracked as local markdown files under `.scratch/<feature>/`. No remote issue tracker. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Five canonical triage roles using default label strings. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context layout — one `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
