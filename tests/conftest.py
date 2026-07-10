@@ -9,23 +9,48 @@ import pytest
 
 @pytest.fixture
 def project_root() -> Path:
-    """Return the project root directory."""
+    """Return the project root directory.
+
+    Returns:
+        Path: Absolute path to the project root directory.
+    """
     return Path(__file__).resolve().parent.parent
 
 
 @pytest.fixture
 def skills_dir(project_root: Path) -> Path:
-    """Return the skills directory."""
+    """Return the skills directory.
+
+    Args:
+        project_root: Absolute path to the project root directory.
+
+    Returns:
+        Path: Absolute path to the skills directory.
+    """
     return project_root / "skills"
 
 
 @pytest.fixture
 def agents_dir(project_root: Path) -> Path:
-    """Return the agents directory."""
+    """Return the agents directory.
+
+    Args:
+        project_root: Absolute path to the project root directory.
+
+    Returns:
+        Path: Absolute path to the agents directory.
+    """
     return project_root / "agents"
 
 
 @pytest.fixture
 def scripts_dir(project_root: Path) -> Path:
-    """Return the scripts directory."""
+    """Return the scripts directory.
+
+    Args:
+        project_root: Absolute path to the project root directory.
+
+    Returns:
+        Path: Absolute path to the scripts directory.
+    """
     return project_root / "scripts"
