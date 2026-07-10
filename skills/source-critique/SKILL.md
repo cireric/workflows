@@ -4,6 +4,8 @@ description: >
   来源批判方法论——评估 web 信息源的可信度，识别利益冲突、数据溯源断裂、样本偏差与证据强度不足。
   Use when collecting or citing web information sources, evaluating source credibility,
   or when research involves claims from external (non-code) sources.
+compatibility: opencode
+agent: researcher
 ---
 
 # SOURCE CRITIQUE
@@ -14,11 +16,11 @@ description: >
 
 本 skill 与 MISSION 的信息源体系互补而非重叠：
 
-| 层级         | 位置                    | 职责                                                          |
-| ------------ | ----------------------- | ------------------------------------------------------------- |
-| 信息源分级   | MISSION WORLD KNOWLEDGE | 给出 tier 基线："这类来源的一般可信度是什么"                  |
-| 降级检测     | 本 skill 规则 1-3       | 来源类型区分、利益冲突识别、6步溯源流程、证据强度评估         |
-| 偏差校正     | 本 skill 规则 4         | 识别信息收集中的系统性偏差并主动校正                          |
+| 层级       | 位置                    | 职责                                                  |
+| ---------- | ----------------------- | ----------------------------------------------------- |
+| 信息源分级 | MISSION WORLD KNOWLEDGE | 给出 tier 基线："这类来源的一般可信度是什么"          |
+| 降级检测   | 本 skill 规则 1-3       | 来源类型区分、利益冲突识别、6步溯源流程、证据强度评估 |
+| 偏差校正   | 本 skill 规则 4         | 识别信息收集中的系统性偏差并主动校正                  |
 
 MISSION 的信息源分级给出 tier 基线，本 skill 在基线上增加同 tier 内的来源质量评估和偏差校正。
 
@@ -112,12 +114,12 @@ MISSION 的信息源分级给出 tier 基线，本 skill 在基线上增加同 t
 
 ## 与系统提示词的接口
 
-| 本 skill 规则     | 系统提示词对应概念          | 关系                                                         |
-| ----------------- | --------------------------- | ------------------------------------------------------------ |
-| 规则1 利益冲突    | WORLD KNOWLEDGE 信息源分级  | 在 tier 基线上增加同 tier 内的利益冲突检测                   |
-| 规则2 数据溯源    | VERIFY OR DON'T CLAIM       | 数据溯源是 VERIFY OR DON'T CLAIM 在 web 信息源场景的操作性扩展 |
-| 规则3 证据强度    | VERIFY OR DON'T CLAIM       | 证据强度评估是证据层级在 web 信息源场景的具体展开            |
-| 规则4 偏差校正    | MULTIPLE HYPOTHESES         | 偏差校正（来源层面）与假设层面确认偏差协同——双轨校正          |
+| 本 skill 规则  | 系统提示词对应概念         | 关系                                                           |
+| -------------- | -------------------------- | -------------------------------------------------------------- |
+| 规则1 利益冲突 | WORLD KNOWLEDGE 信息源分级 | 在 tier 基线上增加同 tier 内的利益冲突检测                     |
+| 规则2 数据溯源 | VERIFY OR DON'T CLAIM      | 数据溯源是 VERIFY OR DON'T CLAIM 在 web 信息源场景的操作性扩展 |
+| 规则3 证据强度 | VERIFY OR DON'T CLAIM      | 证据强度评估是证据层级在 web 信息源场景的具体展开              |
+| 规则4 偏差校正 | MULTIPLE HYPOTHESES        | 偏差校正（来源层面）与假设层面确认偏差协同——双轨校正           |
 
 纯增量（无系统提示词对应）：规则4.2 推理前提偏差（前提不可迁移是独立维度）、规则2步骤6 对象变更（web 信息源特有的版本追踪需求）。
 
