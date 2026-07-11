@@ -48,7 +48,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["S101", "INP001"]  # assert allowed in tests; no __init__.py required
+"tests/*" = ["S101", "INP001", "PLR2004", "PLR6301", "S404", "S603"]  # assert allowed in tests; no __init__.py required; magic values; no-self-use; subprocess in tests
 "scripts/e3_scorer.py" = ["S404", "S603"]  # subprocess used intentionally in scorer script
 
 [tool.ruff.lint.pydocstyle]
