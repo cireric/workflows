@@ -26,8 +26,8 @@ docs/agent-eval/
 | 1   | 基础执行   | `01-simple-task.md`             | TODO 铁律是否生效？步骤追踪、单步聚焦、完成标记是否遵守？                        |
 | 2   | TDD 纪律   | `02-tdd-task.md`                | Red→Green→Refactor 循环是否完整？Red 是否有效（断言失败而非基础设施错误）？      |
 | 3   | 全链路执行 | `03-explore-task.md`            | DISCOVER→PLAN→EXECUTE→VERIFY→QA GATE 是否完整走通？阶段转换输出是否规范？        |
-| 4   | 歧义处理   | `04-ambiguous-task.md`          | 意图声明是否准确？歧义是否被识别并回问？是否在不确定时假设而非询问？             |
-| 5   | 失败恢复   | `05-qa-failure-task.md`         | QA GATE 失败后是否诊断失败级别？是否按 understanding/implementation error 路由？ |
+| 4   | 歧义处理   | `04-ambiguous-task.md`          | 两层歧义是否被逐层识别？工作量差异 2x+ 的歧义是否回问用户？假设是否声明？       |
+| 5   | 失败恢复   | `05-qa-failure-task.md`         | 函数间交互约束导致运行时错误，QA GATE 是否检测？是否诊断为 understanding error？  |
 | 6   | 约束衰减   | `06-long-chain-task.md`         | 多步骤后约束是否仍然遵守？约束重注入是否在阶段转换时触发？                       |
 | 7   | 信息不完备 | `07-complex-incomplete-task.md` | 信息不足时是否主动探索？是否合理声明假设 vs 阻塞？是否使用 explore/librarian？   |
 

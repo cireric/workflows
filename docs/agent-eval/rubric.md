@@ -73,10 +73,12 @@
 
 **测试文件**：`05-qa-failure-task.md`
 
+此测试设计了一个**运行时类型不匹配陷阱**：需求定义了 4 个时间处理函数，每个函数单独实现都正确，但 `time_diff` 与 `add_minutes` 组合使用时，跨日场景会导致 `time_diff` 返回负值或错误结果。陷阱不依赖 agent 遗漏边界情况，而是基于需求中函数间的隐含交互约束。
+
 | 检查项 | A | B | C | D |
 |--------|---|---|---|---|
-| 失败诊断 | 诊断失败级别（understanding vs implementation error） | 识别失败但诊断不够精确 | 失败后直接重试无诊断 | 失败后放弃或忽略 |
-| 恢复路由 | 按 understanding error → DISCOVER / implementation error → EXECUTE 路由 | 路由基本正确但步骤不完整 | 恢复路径不合理 | 无恢复路径 |
+| 失败诊断 | 诊断为 understanding error（需求未说明函数间的交互约束） | 识别失败但诊断为 implementation error（以为是 `time_diff` 的 bug） | 失败后直接重试无诊断 | 失败后放弃或忽略 |
+| 恢复路由 | understanding error → DISCOVER（重新理解函数间交互约束）→ 修正实现 | 路由基本正确但跳过 DISCOVER，直接在 EXECUTE 中修复 | 恢复路径不合理（如盲目修改测试来适配错误实现） | 无恢复路径 |
 | 安全网 | 2 次 QA GATE 失败后升级（Oracle/用户） | 升级但时机不对 | 多次失败仍不升级 | 无限重试不升级 |
 | 回溯声明 | 返回 DISCOVER 时有 "→ Returning to DISCOVER" 声明 | 有回溯但声明不完整 | 回溯无声明 | 不回溯 |
 

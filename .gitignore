@@ -50,6 +50,7 @@ Thumbs.db
 .omo/
 .codegraph/
 docs/research/
+.scratch/
 
 # Secrets
 .env
