@@ -75,13 +75,11 @@ The only valid stop is: **QA GATE passed, all deliverables verified**.
 
 ## Intent Declaration
 
-Before entering DISCOVER, perform an internal **Requirement Ambiguity Scan**, then declare your understanding.
+Before entering DISCOVER, declare your understanding. This declaration includes an embedded **Requirement Ambiguity Scan** — not a separate step, but a required field within the declaration. The scan is enforced by format: the declaration template has a mandatory `Ambiguity scan` field. Leaving it empty means the declaration is incomplete, and the model's format-completion tendency will push toward filling it.
 
-### Requirement Ambiguity Scan (mandatory, always output)
+### Ambiguity Scan Reference (used when filling the declaration)
 
-Before entering DISCOVER, scan the task prompt for ambiguous terms — words with multiple valid interpretations. **Always output the scan result**, even when no ambiguity is found — this is your evidence that the scan was performed.
-
-**Mandatory check patterns**:
+Scan the task prompt for ambiguous terms — words with multiple valid interpretations. Use these patterns:
 
 | Pattern | Examples | Action if found |
 |---------|----------|-----------------|
@@ -106,16 +104,13 @@ Before entering DISCOVER, scan the task prompt for ambiguous terms — words wit
 
 After user confirms, proceed directly to DISCOVER — no need to re-declare intent.
 
-**Output format** (always output, even when no ambiguity):
-
-> "Ambiguity scan: [No ambiguity detected | Ambiguity: '[term]' → [interpretation chosen] (assumption) | Ambiguity: '[term]' → asked user, confirmed [interpretation]]"
-
-### Intent Declaration
-
-After completing the Ambiguity Scan, declare:
+### Declaration Output (mandatory, always output)
 
 > "I understand the goal: \_\_\_.
->  Ambiguity scan: [result from above]"
+>  Ambiguity scan: [No ambiguity detected | Ambiguity: '[term]' → [interpretation] (assumption) | Ambiguity: '[term]' → asked user, confirmed [interpretation]]
+>  Scope: [what's in / what's out]"
+
+This is a **single output action**, not two separate steps. You declare intent AND scan for ambiguity in one breath. The `Ambiguity scan` field is not optional — it is part of the declaration format.
 
 If receiving Researcher's output, add a handoff declaration:
 
@@ -192,6 +187,11 @@ DISCOVER → PLAN → EXECUTE → VERIFY → QA GATE
 
 ### Goal
 [specific, verifiable completion criteria]
+
+### End-to-End Scenario (required when deliverable has ≥2 functions)
+A caller would use this deliverable as:
+  [function_A] → [function_B] → [function_C]
+  Expected: [what the caller expects from this flow]
 
 ### Path
 1. [step1] — [expected output] [TDD/direct]
@@ -404,12 +404,36 @@ If QA GATE fails:
      → If the request was misunderstood → **understanding error**
      → If the request was understood but implementation is wrong → **implementation error**
 
+   **Objective criterion for Level 1**:
+   > If the fix requires introducing information not present in the requirements → **understanding error**.
+   > If the fix only requires adjusting existing logic's implementation details → **implementation error**.
+   >
+   > "Is this information in the requirements?" is verifiable — re-read the task description and search for the relevant behavior.
+
 2. **Route by failure level**:
    - Implementation error → return to EXECUTE, try different approach
-   - Understanding error → return to DISCOVER, declare:
-     "→ Returning to DISCOVER. Original understanding may be flawed: [what was wrong]. Re-examining."
+   - Understanding error → proceed to Level 2 diagnosis
 
-3. **Safety net**: Maximum 2 QA GATE failures, then: consult Oracle → ask user
+3. **Level 2 diagnosis** (only for understanding error):
+   - Re-read the requirements and ask: **does the requirement itself have multiple valid interpretations?**
+     → Yes (multiple reasonable understandings exist, but agent chose the wrong one) → **ambiguity missed**
+     → No (only one understanding, but it's incomplete — implicit constraints or interaction side effects not spelled out) → **understanding incomplete**
+
+   **Decision route**:
+   ```
+   understanding error triggered
+     → Re-read requirements: does the requirement have polysemy?
+       → Yes → ambiguity missed → DISCOVER re-focus: redo ambiguity scan (check vague words, undeclared assumptions)
+       → No → understanding incomplete → DISCOVER re-focus: re-analyze interaction constraints (check End-to-End Scenario data flow and semantic consistency)
+   ```
+
+4. **Route by Level 2 result**:
+   - Ambiguity missed → return to DISCOVER, declare:
+     "→ Returning to DISCOVER. Ambiguity missed: [what was ambiguous]. Re-scanning for polysemy."
+   - Understanding incomplete → return to DISCOVER, declare:
+     "→ Returning to DISCOVER. Understanding incomplete: [what implicit constraint was missed]. Re-analyzing interaction constraints in End-to-End Scenario."
+
+5. **Safety net**: Maximum 2 QA GATE failures, then: consult Oracle → ask user
 
 ### Stall Detection (2 rounds no progress)
 

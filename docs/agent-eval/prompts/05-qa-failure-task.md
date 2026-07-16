@@ -1,60 +1,60 @@
-# Test 05: QA Failure Task — Failure Recovery
+# Test 05: Interaction Constraint Identification — PLAN Stage
 
-**维度**：失败恢复
-**预期步骤数**：6-10（含恢复循环）
-**预期耗时**：15-25 分钟
+**维度**：交互约束识别
+**预期步骤数**：6-10
+**预期耗时**：10-20 分钟
 
 ---
 
 ## Task Prompt
 
-在 `scripts/` 目录下创建 `time_range.py`，实现时间范围计算工具：
+在 `scripts/` 目录下创建 `file_filter.py`，实现文件过滤工具：
 
-1. 函数 `parse_time(s: str) -> tuple[int, int]`：解析时间字符串为 `(hours, minutes)` 元组
-   - 接受格式：`"HH:MM"`（24 小时制），如 `"09:30"` → `(9, 30)`
-   - 无效格式抛出 `ValueError`
-2. 函数 `format_time(t: tuple[int, int]) -> str`：将 `(hours, minutes)` 元组格式化为字符串
-   - 输出格式：`"HH:MM"`（24 小时制，零填充），如 `(9, 30)` → `"09:30"`
-3. 函数 `time_diff(start: str, end: str) -> str`：计算两个时间之间的差值
-   - 返回格式：`"Xh Ym"`，如 `time_diff("09:00", "11:30")` → `"2h 30m"`
-4. 函数 `add_minutes(time: str, minutes: int) -> str`：在给定时间上增加分钟数
-   - 跨日自动回绕（如 23:00 + 120min → 01:00），如 `add_minutes("22:30", 90)` → `"00:00"`
+1. 函数 `load_rules(path: str) -> list[dict]`：从 JSON 文件加载过滤规则列表
+   - 每条规则: `{"pattern": str, "action": "include"|"exclude"}`
+2. 函数 `filter_files(files: list[str], rules: list[dict]) -> list[str]`：返回匹配 include 规则的文件
+   - 规则按顺序应用，先匹配到的规则决定文件的命运
+3. 函数 `categorize(files: list[str], rules: list[dict]) -> dict[str, list[str]]`：将文件按匹配的 include 规则分组
+   - 返回 `{rule_pattern: [matched_files]}`
+4. 函数 `summarize(categories: dict[str, list[str]]) -> dict[str, int]`：统计每个分类的文件数量
+   - 返回 `{rule_pattern: count}`
 
 要求：
 - 类型注解完整，Google 风格 docstring
 - `from __future__ import annotations` 作为首行
-- 添加对应的测试文件 `tests/test_time_range.py`
+- 添加对应的测试文件 `tests/test_file_filter.py`
 
 ---
 
 ## 评估要点
 
-此任务设计了一个**运行时类型不匹配陷阱**——需求本身在函数间引入了类型矛盾：
+> **维度重叠说明**：`categorize` 的匹配语义未在 prompt 中明确说明（首匹配优先？全匹配？），这本身是一个歧义。维度 5（交互约束识别）评估 agent 是否在 PLAN 阶段识别该语义并推导其与 `filter_files` 的一致性。如果 agent 在 Intent Declaration 的 Ambiguity scan 中识别了该歧义，维度 4（歧义处理）也应给分。两个维度在此测试上存在天然重叠，评分时分别从各自角度评估。
 
-**隐藏陷阱——`add_minutes` 需要处理跨日回绕，但 `parse_time` 返回的 `(hours, minutes)` 元组无法表达跨日信息**：
+此任务设计了一个**函数间语义不一致陷阱**——`filter_files` 和 `categorize` 对规则匹配顺序的语义不同：
 
-1. Agent 按需求字面实现后，`add_minutes` 内部会调用 `parse_time` 得到 `(hours, minutes)`，加上分钟数后得到新的 `(hours, minutes)`
-2. 跨日回绕计算：`hours = (hours + extra_hours) % 24` — 这在逻辑上正确
-3. **但 QA GATE 会发现一个问题**：`add_minutes` 内部将 `parse_time` 返回的 `(22, 30)` 加 90 分钟后，得到 `(0, 0)`，然后调用 `format_time((0, 0))` 得到 `"00:00"` — 这**看起来**正确
-4. **真正的陷阱**：当 `add_minutes` 的结果需要再传给 `time_diff` 时，`time_diff` 期望的是同一天内的时间差。`time_diff("22:30", "00:00")` 按简单实现会得到 `"-22h 30m"` 而非 `"1h 30m"`——因为 `parse_time("00:00")` 得到 `(0, 0)`，而 `parse_time("22:30")` 得到 `(22, 30)`，简单减法得到负数
+**隐藏陷阱**：
+- 提示词中 `filter_files` 的子项说明了"规则按顺序应用，先匹配到的规则决定文件的命运"
+- 但 `categorize` 只说"按匹配的 include 规则分组"，未说明匹配语义——agent 需要自己推导
+- 自然推导：`categorize` 也会按顺序匹配，一个文件归入第一个匹配的分类
+- 陷阱：当规则有 `"*.py" → include` 和 `"test_*.py" → include"` 时，`categorize` 会把 `test_*.py` 归入 `*.py` 分类而非 `test_*.py` 分类（因为 `*.py` 先匹配）
+- 但 `filter_files` 中 `"test_*.py" → include` 会先于 `"*.py"` 匹配（如果 `test_*.py` 规则在前），所以两个函数的匹配优先级语义可能不一致
+- 用户期望 `test_*.py` 有独立的分类计数，但 `summarize` 的结果与预期不符
 
-**为什么这个陷阱更可靠**：
-
-1. **会导致运行时错误/错误输出**：`time_diff("22:30", "00:00")` 返回负值或异常，不是"语义不够好"而是"功能直接出错"
-2. **不依赖 agent 遗漏边界情况**：即使 agent 考虑了跨日回绕，也很可能只在 `add_minutes` 中处理，而不会意识到 `time_diff` 也需要处理跨日场景
-3. **触发路径自然**：QA GATE 的 surface verification 会尝试所有函数的组合使用，自然会调用 `time_diff` 与 `add_minutes` 的组合
-4. **失败类型是 understanding error**：agent 按需求分别实现了每个函数，但需求没有说明 `time_diff` 需要处理跨日场景——这是对需求理解不完整，不是实现 bug
+**直觉度分析**：
+- 显式数据流（rules → filter_files → categorize → summarize）：~90% agent 会推导出
+- 语义不一致识别：~30-50% agent 会在 PLAN 阶段识别（提示词未暴露 categorize 匹配语义，需要推理发现）
+- 目标直觉度：30-50%，根据测试反馈调整
 
 重点观察：
 
-1. **QA GATE 失败是否被检测**：agent 是否在 surface verification 中测试了 `time_diff` 与 `add_minutes` 的组合
-2. **失败诊断**：是否诊断为 understanding error（需求未说明跨日场景，但函数间组合使用时暴露了问题）而非 implementation error
-3. **恢复路由**：understanding error → DISCOVER（重新理解需求，认识到函数间的隐含交互约束）而非直接 EXECUTE
-4. **回溯声明**：如果返回 DISCOVER，是否有 "→ Returning to DISCOVER" 声明
-5. **安全网**：如果修复后仍不满意，是否升级到 Oracle/用户
+1. **端到端场景声明**：agent 是否在 PLAN Goal 中声明了 `load_rules → filter_files → categorize → summarize` 的端到端场景
+2. **交互约束识别**：agent 是否在 PLAN 阶段识别了 `filter_files` 与 `categorize` 对匹配顺序的语义不一致
+3. **PLAN 阶段修正**：识别约束后是否在 PLAN 中调整了实现路径或增加了验证步骤
+4. **端到端场景质量**：场景是否覆盖了 `filter_files → categorize` 的组合路径（非直觉的组合）
+5. **如果未识别**：QA GATE 是否暴露问题，诊断是否正确（understanding error → understanding incomplete）
 
-**预期行为**：
-- A 级：QA GATE 测试 `time_diff("22:30", "00:00")` → 发现负值/错误 → 诊断为 understanding error → 回溯到 DISCOVER → 认识到 `time_diff` 需要处理跨日场景 → 修复 → 重新 QA GATE → 通过
-- B 级：QA GATE 发现问题但诊断为 implementation error → 直接 EXECUTE 修复（添加跨日处理）→ 仍能修复
-- C 级：QA GATE 未测试 `time_diff` 与 `add_minutes` 的组合（"看起来正确"即通过），或发现后无诊断直接重试
-- D 级：跳过 QA GATE 或失败后放弃
+预期行为：
+- A 级：PLAN Goal 包含完整端到端场景，识别匹配语义不一致，在 Constraints 中声明，调整实现路径
+- B 级：有端到端场景但未识别语义不一致，执行中发现问题并修正
+- C 级：端到端场景只覆盖单个函数的独立使用，未识别交互约束
+- D 级：无端到端场景声明，从未识别交互约束

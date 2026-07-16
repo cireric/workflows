@@ -14,7 +14,7 @@ Sisyphus 执行 deepworker 评估测试的操作手册。
 
 从 `docs/agent-eval/prompts/` 中选择要执行的测试。可以逐个执行，也可以批量执行。
 
-**建议顺序**：01 → 02 → 03 → 04 → 05 → 06 → 07（从简单到复杂）
+**建议顺序**：01 → 02 → 03 → 04 → 05 → 06 → 07 → 08 → 09（从简单到复杂）
 
 ### Step 2: 委派任务
 
@@ -33,6 +33,8 @@ task(
 - `run_in_background=false`：同步等待，确保完整收集输出
 - prompt 中只包含 "Task Prompt" 部分的内容，不包含 "评估要点" 部分
 - 每个测试独立执行，不要在一个 session 中连续执行多个测试
+
+**Session ID 收集**：`task()` 返回结果中包含 deepworker 的 session ID（格式 `ses_...`）。记录此 ID，用于后续日志收集。如果 `task()` 返回值中未直接暴露 session ID，可通过 `session_list()` 按时间排序获取最近创建的 session。
 
 ### Step 3: 收集日志
 
@@ -81,6 +83,8 @@ git clean -fd scripts/ tests/  # 删除新创建的文件（谨慎使用）
 
 **注意**：只清理 agent 在测试中创建/修改的文件，不要清理日志文件。
 
+**清理验证**：清理后运行 `git status` 确认工作区干净。如果仍有残留文件，手动删除后再开始下一个测试。避免测试间污染。
+
 ### Step 5: 评分
 
 按 `docs/agent-eval/rubric.md` 中的标准，对每个检查项打分。
@@ -114,7 +118,7 @@ git clean -fd scripts/ tests/  # 删除新创建的文件（谨慎使用）
 
 - **Model**: {model-slug}
 - **Date**: {timestamp}
-- **Tests Run**: {N}/7
+- **Tests Run**: {N}/9
 
 ---
 
@@ -126,7 +130,7 @@ git clean -fd scripts/ tests/  # 删除新创建的文件（谨慎使用）
 | TDD 纪律 | 02-tdd | B | 3 | ... |
 | ... | ... | ... | ... | ... |
 
-**综合分**: {total}/28
+**综合分**: {total}/48（加权）
 **综合等级**: {A+/A/B/C/D}
 
 ---
@@ -169,12 +173,24 @@ git clean -fd scripts/ tests/  # 删除新创建的文件（谨慎使用）
 
 ## 批量执行脚本
 
-如果需要一次性运行所有 7 个测试，按以下顺序逐个执行（不要并行，因为每个测试都会修改工作区）：
+如果需要一次性运行所有 9 个测试，按以下顺序逐个执行（不要并行，因为每个测试都会修改工作区）：
 
 1. 读取 `01-simple-task.md` 的 Task Prompt → 委派 → 收集日志 → 清理
 2. 读取 `02-tdd-task.md` 的 Task Prompt → 委派 → 收集日志 → 清理
-3. ... 依此类推
-4. 全部完成后 → 生成综合报告
+3. 复制 `03-fixtures/e3_scorer.py` → 读取 `03-explore-task.md` 的 Task Prompt → 委派 → 收集日志 → 清理
+4. 复制 `04-fixtures/e3_scorer.py` → 读取 `04-ambiguous-task.md` 的 Task Prompt → 委派 → 收集日志 → 清理
+5. 读取 `05-qa-failure-task.md` 的 Task Prompt → 委派 → 收集日志 → 清理
+6. 读取 `06-long-chain-task.md` 的 Task Prompt → 委派 → 收集日志 → 清理
+7. 读取 `07-complex-incomplete-task.md` 的 Task Prompt → 委派 → 收集日志 → 清理
+8. 复制 `08-fixtures/` → 读取 `08-qa-recovery-task.md` 的 Task Prompt → 委派 → 收集日志 → 清理
+9. 读取 `09-implicit-ambiguity-task.md` 的 Task Prompt → 委派 → 收集日志 → 清理
+10. 全部完成后 → 生成综合报告
+
+**Test 03 特殊说明**：此测试使用预置代码。委派前，执行者需先运行素材准备步骤（见 `03-explore-task.md` 的"执行者准备步骤"），将 fixtures 中的代码复制到 `scripts/`。**准备步骤不得出现在传给 agent 的 prompt 中**——agent 只应看到"代码已存在"的事实。清理时 `git clean -fd scripts/ tests/` 会删除这些文件，无需额外操作。
+
+**Test 04 特殊说明**：此测试需要 `scripts/e3_scorer.py` 存在，以测试"评分脚本"指代不明的歧义。委派前，执行者需先运行素材准备步骤（见 `04-ambiguous-task.md` 的"执行者准备步骤"），将 fixtures 中的代码复制到 `scripts/`。**准备步骤不得出现在传给 agent 的 prompt 中**——agent 只应看到"代码已存在"的事实。清理时 `git clean -fd scripts/ tests/` 会删除这些文件，无需额外操作。
+
+**Test 08 特殊说明**：此测试使用预置交互约束缺失代码。委派前，执行者需先运行素材准备步骤（见 `08-qa-recovery-task.md` 的"执行者准备步骤"），将 fixtures 中的代码复制到 `scripts/` 和 `tests/`。**准备步骤不得出现在传给 agent 的 prompt 中**——agent 只应看到"代码已存在"的事实。清理时 `git clean -fd scripts/ tests/` 会删除这些文件，无需额外操作。
 
 **不要并行执行**：每个测试都会创建/修改文件，并行执行会导致文件冲突。
 
@@ -192,7 +208,7 @@ git clean -fd scripts/ tests/  # 删除新创建的文件（谨慎使用）
 | 基础执行 | A | B | A |
 | TDD 纪律 | B | C | A |
 | ... | ... | ... | ... |
-| **综合** | A (24/28) | C (16/28) | A+ (26/28) |
+| **综合** | A (40/48) | C (24/48) | A+ (46/48) |
 ```
 
 ## 注意事项
@@ -202,3 +218,4 @@ git clean -fd scripts/ tests/  # 删除新创建的文件（谨慎使用）
 3. **完整记录**：即使 agent 输出很长，也要完整记录，不要截断
 4. **时间记录**：记录每个测试的实际耗时，作为效率参考
 5. **清理彻底**：每个测试后必须彻底清理，避免测试间污染
+6. **清理验证**：清理后运行 `git status` 确认工作区干净，残留文件需手动删除后再开始下一个测试

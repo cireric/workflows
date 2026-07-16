@@ -8,7 +8,7 @@
 
 ## Task Prompt
 
-为 `scripts/e3_scorer.py` 添加一个新功能：**一致性检查报告生成器**。
+`scripts/e3_scorer.py` 已实现。请阅读其代码，理解其数据结构和评分逻辑，然后添加一个新功能：**一致性检查报告生成器**。
 
 具体要求：
 1. 读取 `scripts/e3_scorer.py` 的现有代码，理解其数据结构和评分逻辑
@@ -20,6 +20,18 @@
 4. 确保不破坏现有功能
 
 **注意**：你不熟悉 `e3_scorer.py` 的实现细节，需要先探索理解。
+
+---
+
+## 执行者准备步骤（不传给 agent）
+
+在委派任务前，执行者需将预置素材复制到工作目录：
+
+```bash
+cp docs/agent-eval/prompts/03-fixtures/e3_scorer.py scripts/e3_scorer.py
+```
+
+**注意**：此步骤不得出现在传给 deepworker 的 prompt 中。agent 应只看到"代码已存在"的事实，不知道代码来源。
 
 ---
 

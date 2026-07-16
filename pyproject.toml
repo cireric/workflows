@@ -36,6 +36,7 @@ pythonVersion = "3.13"
 line-length = 100
 target-version = "py313"
 preview = true
+exclude = ["docs/agent-eval/prompts/*-fixtures/"]
 
 [tool.ruff.lint]
 select = ["ALL"]
@@ -62,6 +63,7 @@ strict = true
 python_version = "3.13"
 enable_error_code = ["deprecated", "ignore-without-code"]
 warn_unreachable = true
+exclude = "docs/agent-eval/prompts/.*-fixtures/"
 
 [[tool.mypy.overrides]]
 module = "yaml.*"
