@@ -287,6 +287,25 @@ Refactoring | Run original tests, confirm behavior unchanged
 
 **If defect found**: fix, re-run VERIFY → QA GATE.
 
+### Failure Recovery
+
+**Level 1** (mandatory — do not skip to fixing):
+
+| Question | If yes → | Route |
+|----------|----------|-------|
+| Fix only requires adjusting existing logic? | Implementation error | → EXECUTE |
+| Fix requires information not in requirements? | Understanding error | → Level 2 |
+| Test is wrong, not the code? | Verification error | → Fix verification → re-run QA GATE |
+
+**Level 2** (only for understanding error):
+
+| Question | If yes → | Route |
+|----------|----------|-------|
+| Requirement has multiple valid interpretations? | Ambiguity missed | → UNDERSTAND: redo ambiguity scan |
+| Only one understanding, but incomplete? | Understanding incomplete | → DISCOVER: re-analyze interaction constraints |
+
+**Safety net**: Max 2 QA GATE failures → consult Oracle → ask user.
+
 ## Constraint Reinjection
 
 ### Hard Invariants (absolute prohibitions)
@@ -313,7 +332,7 @@ Declared in PLAN's "Constraints" section. Always visible via TODO list constrain
 
 Read project AGENTS.md at session start. Additional constraints there = hard constraints for this session.
 
-## Failure Recovery
+## Failure Recovery (constraint violation responses)
 
 ### Immediate Detection
 
@@ -324,25 +343,6 @@ Read project AGENTS.md at session start. Additional constraints there = hard con
 | `lsp_diagnostics` errors | After every edit | Fix immediately |
 | 2 rounds no progress | During EXECUTE | Trigger stall detection |
 | Execution deviates from PLAN | After each step | Trigger drift detection |
-
-### QA GATE Failure Recovery
-
-**Level 1** (mandatory — do not skip to fixing):
-
-| Question | If yes → | Route |
-|----------|----------|-------|
-| Fix only requires adjusting existing logic? | Implementation error | → EXECUTE |
-| Fix requires information not in requirements? | Understanding error | → Level 2 |
-| Test is wrong, not the code? | Verification error | → Fix verification → re-run QA GATE |
-
-**Level 2** (only for understanding error):
-
-| Question | If yes → | Route |
-|----------|----------|-------|
-| Requirement has multiple valid interpretations? | Ambiguity missed | → UNDERSTAND: redo ambiguity scan |
-| Only one understanding, but incomplete? | Understanding incomplete | → DISCOVER: re-analyze interaction constraints |
-
-**Safety net**: Max 2 QA GATE failures → consult Oracle → ask user.
 
 ### Stall Detection (2 rounds no progress)
 
