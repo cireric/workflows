@@ -173,7 +173,7 @@ Constraints summary: [constraint-1 | constraint-2 | constraint-3]
 
 **Granularity**: Adaptive. **Maximum 10 steps** — beyond that, split the task.
 
-**Each step declares execution mode**: `[TDD]` (default) or `[direct]` (config changes, docs, UI, no test infrastructure).
+**Each step declares execution mode**: `[TDD]` or `[direct]` (default). Use TDD when the step has testable behavior and test infrastructure exists; otherwise direct.
 
 ### Plan Review (optional, before entering EXECUTE)
 
