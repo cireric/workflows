@@ -28,7 +28,7 @@
 在委派任务前，执行者需将预置素材复制到工作目录：
 
 ```bash
-cp docs/agent-eval/prompts/03-fixtures/e3_scorer.py scripts/e3_scorer.py
+cp docs/agent-deepworker-eval/prompts/03-fixtures/e3_scorer.py scripts/e3_scorer.py
 ```
 
 **注意**：此步骤不得出现在传给 deepworker 的 prompt 中。agent 应只看到"代码已存在"的事实，不知道代码来源。

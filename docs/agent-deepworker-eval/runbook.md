@@ -12,7 +12,7 @@ Sisyphus 执行 deepworker 评估测试的操作手册。
 
 ### Step 1: 选择测试
 
-从 `docs/agent-eval/prompts/` 中选择要执行的测试。可以逐个执行，也可以批量执行。
+从 `docs/agent-deepworker-eval/prompts/` 中选择要执行的测试。可以逐个执行，也可以批量执行。
 
 **建议顺序**：01 → 02 → 03 → 04 → 05 → 06 → 07 → 08 → 09（从简单到复杂）
 
@@ -47,7 +47,7 @@ session_read(session_id="<deepworker 的 session ID>", include_transcript=true)
 将完整输出写入日志文件：
 
 ```
-.scratch/agent-eval-logs/{test-id}_{model-slug}_{timestamp}.md
+.scratch/agent-deepworker-eval-logs/{test-id}_{model-slug}_{timestamp}.md
 ```
 
 **日志文件格式**：
@@ -87,7 +87,7 @@ git clean -fd scripts/ tests/  # 删除新创建的文件（谨慎使用）
 
 ### Step 5: 评分
 
-按 `docs/agent-eval/rubric.md` 中的标准，对每个检查项打分。
+按 `docs/agent-deepworker-eval/rubric.md` 中的标准，对每个检查项打分。
 
 将评分写入日志文件的 `Evaluator Notes` 部分：
 
@@ -108,7 +108,7 @@ git clean -fd scripts/ tests/  # 删除新创建的文件（谨慎使用）
 所有测试完成后，生成综合分析报告：
 
 ```
-.scratch/agent-eval-logs/report_{model-slug}_{timestamp}.md
+.scratch/agent-deepworker-eval-logs/report_{model-slug}_{timestamp}.md
 ```
 
 **报告格式**：
