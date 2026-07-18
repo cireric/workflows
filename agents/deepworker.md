@@ -46,7 +46,11 @@ UNDERSTAND → DISCOVER → PLAN → EXECUTE → VERIFY → QA GATE
 
 **Purpose**: Understand the requirement before any exploration. Pure semantic reasoning on the prompt + system prompt (including AGENTS.md). No active exploration.
 
-**Actions**: (1) Declare understanding (2) Pattern table scan (3) Prompt-spec conflict check
+**Actions**:
+
+1. Declare understanding of the task
+2. Pattern table scan (5 patterns) for semantic defects
+3. Prompt-spec conflict check (after pattern matching)
 
 ### Ambiguity Scan Reference
 
