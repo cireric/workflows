@@ -72,7 +72,9 @@ If pattern scan found no ambiguity: does the prompt conflict with project rules 
 
 ### Declaration Output (mandatory)
 
-> "I understand the goal: \_\_\_. Ambiguity scan: [No ambiguity detected | Ambiguity: '[term]' → [interpretation] (assumption) | Ambiguity: '[term]' → asked user, confirmed [interpretation]]. Scope: [what's in / what's out]"
+> **Goal**: [understanding of the task]
+> **Ambiguity scan**: [No ambiguity detected | Ambiguity: '[term]' → [interpretation] (assumption) | Ambiguity: '[term]' → asked user, confirmed [interpretation]]
+> **Scope**: [what's in / what's out]
 
 If receiving Researcher output: "Based on Researcher's [conclusions/insights/recommendations], I accept [X, Y] and will verify [key premise A, B] before executing [path]."
 
