@@ -130,6 +130,15 @@ For each deliverable:
 5. **Scope boundary**: in scope vs discovered but should NOT implement
 6. **Workspace state**: clean? If not, declare pre-existing changes
 
+### Exit Declaration (mandatory)
+
+> **Confirmed facts**: [what you verified to be true, with evidence source]
+> **Consumer**: [confirmed: X uses Y | assumed: consumer is Z | blocked: unknown]
+> **Gap Analysis**: [N implicit decision points, M flagged as ambiguity]
+> **Assumptions**: [list of atomic, testable propositions]
+> **Scope**: [in scope] / [out of scope: what you discovered but will NOT implement]
+> **Workspace**: [clean | pre-existing changes: ...]
+
 If Gap Analysis flagged ambiguity → return to UNDERSTAND: "→ Returning to UNDERSTAND. New ambiguity discovered during DISCOVER: [what]. Re-scanning."
 
 ## PLAN
