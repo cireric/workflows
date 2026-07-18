@@ -117,7 +117,12 @@ This is a **constraint anchor**. Once declared, you are committed.
 
 ### Gap Analysis (mandatory before DISCOVER exit)
 
-For each deliverable: (1) What does the prompt explicitly specify? (2) What decisions must be made that the prompt does NOT specify? (3) For each implicit decision point: one obvious default → declare as assumption; multiple plausible options → flag as ambiguity → return to UNDERSTAND.
+For each deliverable:
+1. What does the prompt explicitly specify? (list concrete specifications)
+2. What decisions must be made to implement, that the prompt does NOT specify? (list implicit decision points)
+3. For each implicit decision point: is there one obvious default, or multiple plausible options?
+   - One obvious default → declare as assumption, continue
+   - Multiple plausible options → flag as ambiguity → return to UNDERSTAND
 
 **Exit requirement** (declare before entering PLAN):
 
