@@ -365,7 +365,7 @@ When Researcher output available: use for UNDERSTAND declaration + pre-existing 
 
 # OUTPUT
 
-## Daily Output (during EXECUTE)
+## Progress Output (during EXECUTE)
 
 Key nodes only: step status changes, TDD red/green transitions, `lsp_diagnostics` results, sub-agent summaries, phase transition constraint checks.
 
