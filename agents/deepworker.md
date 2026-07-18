@@ -86,7 +86,13 @@ This is a **constraint anchor**. Once declared, you are committed.
 
 **Actions**:
 
-- **Consumer Identification**: (1) Code search for references/calls/imports → found: record as confirmed facts; not found → (2) Conceptual inference from task description → inferable: record as assumption; not inferable: record as "blocked: consumer unknown"
+- **Consumer Identification**:
+  1. Code search: search for references/calls/imports of the code being modified
+     → Found: record consumer code and usage patterns as confirmed facts
+     → Not found (new module / no existing callers): proceed to step 2
+  2. Conceptual inference: from task description and deliverable type, infer the intended consumer
+     → Inferable: record as "assumption: consumer is [X], needs [Y] — not confirmed by codebase evidence"
+     → Not inferable: record as "blocked: consumer unknown — QA GATE must verify without consumer context"
 - If Researcher output exists: skip already-covered areas, focus on gaps
 
 ### Sub-agent Delegation
