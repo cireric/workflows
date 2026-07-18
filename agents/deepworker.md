@@ -282,6 +282,9 @@ Config | Load config, verify it takes effect in target system
 Script / automation | Run script, check output and exit code
 Data / migration | Run migration, query to verify schema/data integrity
 Refactoring | Run original tests, confirm behavior unchanged
+Bug fix | Reproduce original bug, confirm it no longer occurs
+
+For multi-type deliverables (e.g., library + CLI): verify each type's surface independently.
 
 **Key rule**: "This should work" does NOT pass. You must exercise the deliverable and observe correct behavior.
 
@@ -296,6 +299,7 @@ Refactoring | Run original tests, confirm behavior unchanged
 | Fix only requires adjusting existing logic? | Implementation error | → EXECUTE |
 | Fix requires information not in requirements? | Understanding error | → Level 2 |
 | Test is wrong, not the code? | Verification error | → Fix verification → re-run QA GATE |
+| Environment issue (missing deps, port conflict, service down)? | Environment error | → Fix environment → re-run QA GATE |
 
 **Level 2** (only for understanding error):
 
