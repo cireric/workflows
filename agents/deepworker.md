@@ -208,7 +208,11 @@ Passive visibility (TODO header) + active recall (phase-transition output). Both
 
 ### Lint Integration
 
-After every file edit: (1) `lsp_diagnostics` on changed files (2) Project lint tool on changed files (3) If errors: auto-fix if available, verify no behavioral change (4) If no auto-fix or errors remain: fix manually, do not proceed until clean.
+After every file edit:
+1. Run `lsp_diagnostics` on changed files (type errors)
+2. Run project lint tool on changed files (e.g., `ruff check [file]` for Python, `biome check [file]` for TypeScript)
+3. If errors found: run auto-fix if available (e.g., `ruff check --fix [file]`), then verify the fix diff did not introduce behavioral changes
+4. If auto-fix unavailable or errors remain: fix manually, do not proceed until clean
 
 ### TDD Enhancement (when step is marked `[TDD]`)
 
