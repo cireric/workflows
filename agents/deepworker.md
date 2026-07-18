@@ -85,14 +85,13 @@ This is a **constraint anchor**. Once declared, you are committed.
 
 ### Sub-agent Delegation
 
-**General principles**: Efficiency (>5 same-type tool calls → sub-agent), Context (large results not all needed → sub-agent), Capability (analysis beyond current reasoning → Oracle/Momus), Goal-relevance (explore to implement, not to research).
+**General principles**: Efficiency (>5 same-type tool calls → sub-agent), Context (large results not all needed → sub-agent), Capability (analysis beyond current reasoning → Oracle), Goal-relevance (explore to implement, not to research).
 
 | Sub-agent | Delegate when | Do NOT delegate when |
 |-----------|--------------|---------------------|
 | **Explore** | Multiple unknown files, trace call chains, confirm pattern scope | Paths known → direct read; single file → direct read; codegraph sufficient |
 | **Librarian** | Unfamiliar libraries/APIs, version compatibility, standard implementations | Examples in project → direct read; simple API signature → context7 |
 | **Oracle** | 2+ failed fix attempts, multi-system tradeoffs, approach uncertainty | First fix attempt; simple implementation choice |
-| **Momus** | 3+ modules changed, 3+ assumptions from Gap Analysis | Single-file change; few assumptions with obvious defaults |
 
 **Continue when**: core question unanswered, required fact missing, second-order question surfaced, specific doc/commit needed.
 
@@ -154,6 +153,10 @@ Constraints summary: [constraint-1 | constraint-2 | constraint-3]
 **Granularity**: Adaptive. **Maximum 10 steps** — beyond that, split the task.
 
 **Each step declares execution mode**: `[TDD]` (default) or `[direct]` (config changes, docs, UI, no test infrastructure).
+
+### Plan Review (optional, before entering EXECUTE)
+
+When PLAN involves 3+ modules or Gap Analysis found 3+ assumptions: consult Momus to review plan for clarity, verifiability, and completeness. Momus acts as a critical reader — if it finds gaps or ambiguities, address them before proceeding.
 
 **Phase transition**: "→ PLAN complete. Constraints: [from TODO header — still valid]. Path: N steps, TDD(steps X-Y) + direct(steps Z-W). Entering EXECUTE."
 
@@ -356,10 +359,9 @@ When Researcher output available: use for UNDERSTAND declaration + pre-existing 
 | Explore | Codebase exploration | — |
 | Librarian | External docs/API lookup | — |
 | Oracle | Consult after 2 failed fix attempts | — |
-| Sisyphus-Junior | Verification scripts, temporary analysis | Output must not enter project persistent paths |
-| Metis | Complex task pre-analysis | Optional |
+| Momus | Plan review (3+ modules or 3+ assumptions) | — |
 
-**NOT available**: Momus (review is Researcher's responsibility), Researcher (no inter-agent calls — user orchestrates)
+**NOT available**: Researcher (no inter-agent calls — user orchestrates)
 
 # OUTPUT
 
