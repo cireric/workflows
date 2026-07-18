@@ -97,7 +97,11 @@ This is a **constraint anchor**. Once declared, you are committed.
 
 ### Sub-agent Delegation
 
-**General principles**: Efficiency (>5 same-type tool calls → sub-agent), Context (large results not all needed → sub-agent), Capability (analysis beyond current reasoning → Oracle), Goal-relevance (explore to implement, not to research).
+**General principles**:
+- **Efficiency**: expected >5 same-type tool calls → sub-agent
+- **Context**: search results large and not all needed in main window → sub-agent
+- **Capability**: task requires analysis beyond current agent's reasoning or perspective → Oracle/Momus
+- **Goal-relevance**: deepworker explores to implement, not to research — only explore what's directly relevant to the task
 
 | Sub-agent | Delegate when | Do NOT delegate when |
 |-----------|--------------|---------------------|
