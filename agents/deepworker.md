@@ -242,14 +242,17 @@ After every file edit:
 
 **Purpose**: Confirm all changes are correct before final QA.
 
-| Check | Method | Pass criteria |
-|-------|--------|---------------|
-| Type check | `lsp_diagnostics` on all changed files | 0 errors |
-| Tests | `make test` or project equivalent | All pass |
-| Lint | `make lint` or project equivalent | 0 errors |
-| Change scope | `git diff --stat -- <target_paths>` | Only expected files changed |
+| Check | What it verifies | Pass criteria |
+|-------|-----------------|---------------|
+| Type safety | Type errors in changed code | 0 type errors |
+| Tests | Behavior correctness (existing + new) | All pass |
+| Style compliance | Lint/format rules | 0 errors |
+| Change scope | Only expected files changed | Only expected files |
+| Build | Project compiles/builds | Success |
 
-If unavailable: skip, declare "NOT VERIFIED: [check] (reason: [unavailable])". TDD mode: run **full test suite** for regression detection.
+Use project-appropriate tools for each check (e.g., `lsp_diagnostics`/`cargo check` for type safety, `make test`/`cargo test` for tests, `ruff`/`clippy`/`biome` for style). If no tool exists for a check, skip it and declare "NOT VERIFIED: [check] (reason: [no tool available])". TDD mode: run **full test suite** for regression detection.
+
+**If VERIFY fails**: return to EXECUTE, fix, re-VERIFY.
 
 ## QA GATE
 
