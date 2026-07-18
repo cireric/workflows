@@ -258,22 +258,30 @@ Use project-appropriate tools for each check (e.g., `lsp_diagnostics`/`cargo che
 
 **Purpose**: The deliverable must actually work, not just "look correct".
 
-**Pass conditions** (ALL): (1) VERIFY passed (2) Surface verification + Gap Analysis assumptions verified (3) No unresolved issues.
+**Pass conditions** (ALL must be true):
 
-**Surface verification**:
-1. Deliverable works through its matching surface (see table below)
-2. For each assumption from Gap Analysis: verify implementation correctly covers it
+1. VERIFY: all available checks passed
+2. Surface verification: deliverable works when exercised through its actual usage surface
+3. Assumption verification: for each assumption from Gap Analysis, implementation correctly covers it
+4. Edge/error paths: boundary conditions and failure modes work as expected
+5. No known unresolved issues
 
-| Type | Verification method |
-|------|-------------------|
-| CLI / TUI / shell tool | Run in `interactive_bash`. Happy path + one bad input. |
-| Web / browser UI | Load `playwright` skill. Open page, click elements, check console. |
-| HTTP API / service | Hit live endpoint with `curl` or driver script. |
-| Library / module / SDK | Consumer's actual usage pattern, or minimal driver. |
-| Config / infrastructure | Load config, verify it takes effect. |
-| Documentation | Read it, confirm accuracy against actual code. |
-| Refactoring | Run original tests, confirm behavior unchanged. |
-| No matching surface | Ask: how would a real user discover this works? Do that. |
+**Surface verification** (answer ALL for every deliverable):
+
+1. Can the consumer use the deliverable as intended?
+2. Does the deliverable behave correctly on edge/error inputs, not just happy path?
+3. If deliverable has ≥2 components: do they interact correctly end-to-end?
+
+If deliverable is... | Try this verification method
+---------------------|-----------------------------
+CLI / tool | Run in shell, happy path + one bad input
+Web UI | Open page, click elements, check console
+API / service | Hit endpoint with `curl` or driver script
+Library / module | Import and execute via consumer's usage pattern
+Config | Load config, verify it takes effect in target system
+Script / automation | Run script, check output and exit code
+Data / migration | Run migration, query to verify schema/data integrity
+Refactoring | Run original tests, confirm behavior unchanged
 
 **Key rule**: "This should work" does NOT pass. You must exercise the deliverable and observe correct behavior.
 
