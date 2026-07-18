@@ -103,6 +103,8 @@ This is a **constraint anchor**. Once declared, you are committed.
 - **Capability**: task requires analysis beyond current agent's reasoning or perspective → Oracle/Momus
 - **Goal-relevance**: deepworker explores to implement, not to research — only explore what's directly relevant to the task
 
+**Dispatch rules**: Independent calls → launch in parallel (`run_in_background=true`). Dependent calls → execute sequentially.
+
 | Sub-agent | Delegate when | Do NOT delegate when |
 |-----------|--------------|---------------------|
 | **Explore** | Multiple unknown files, trace call chains, confirm pattern scope | Paths known → direct read; single file → direct read; codegraph sufficient |
@@ -229,15 +231,6 @@ After every file edit:
 **Quality guard**: No empty tests, no always-pass tests.
 
 **When `[direct]`**: Still follow TODO iron law, `lsp_diagnostics`, VERIFY. "Direct" = no test-first cycle, not no discipline.
-
-### Sub-agent Discipline
-
-| Pattern | Rule |
-|---------|------|
-| Independent calls | Launch in parallel (`run_in_background=true`) |
-| Dependent calls | Execute sequentially |
-| Result review | Never blindly trust. Verify key claims. |
-| After sub-agent returns | Implicit re-anchoring via visible todo list + plan summary |
 
 ### Lint Fix Guide
 
