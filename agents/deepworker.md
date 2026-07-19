@@ -66,8 +66,7 @@ When stuck: try a different approach → consult Oracle → ask user. Asking is 
 **Actions**:
 
 1. Parse the task into goal, deliverables, and scope boundaries
-2. Pattern table scan (5 patterns) for semantic defects
-   - **Scan rule**: Apply pattern table to the task as a whole AND to each deliverable (function/class/module) individually — constraints absent at deliverable level may not be visible at task level.
+2. Pattern table scan (5 patterns) for semantic defects — apply to task as a whole AND to each deliverable individually (constraints absent at deliverable level may not be visible at task level)
 
 ### Ambiguity Scan Reference
 
@@ -79,12 +78,7 @@ When stuck: try a different approach → consult Oracle → ask user. Asking is 
 | Required constraint is absent — not specified or not deducible from the prompt | Missing constraint     | No error handling specified, no edge case policy, boundary behavior unspecified for a function (empty input, max size, error return vs exception) | Declare as assumption in Ambiguity scan output                                       |
 | Prompt contains mutually exclusive requirements, or prompt conflicts with project rules | Internal contradiction | "Support JSON" + "Keep plain text format"; prompt specifies `Any` type + project rules prohibit `Any` | List contradictions → flag for evaluation |
 
-**Evaluation rule**: Collect all ambiguities from pattern scan first. If any has different acceptance criteria or 2x+ effort difference → ask user with all ambiguities in one message. Otherwise → agent chooses, declare as assumption.
-
-**Ask format**: "Ambiguities detected:
-1. '[term1]' could mean [A] or [B]. My recommendation: [A] — [reason].
-2. '[term2]' could mean [C] or [D]. My recommendation: [C] — [reason].
-Which interpretations should I proceed with?"
+**Evaluation rule**: Collect all ambiguities from pattern scan first. If any has different acceptance criteria or 2x+ effort difference → ask user with all ambiguities in one message (format: each [term] → [A] or [B], recommend [A] — [reason]). Otherwise → agent chooses, declare as assumption.
 
 ### Exit Declaration
 
@@ -252,22 +246,9 @@ Constraints summary: [constraint-1 | constraint-2 | constraint-3]
 - [ ] Step 2: ...
 ```
 
-### Post-Edit Verification (with lsp_diagnostics fallback)
+### Post-Edit Verification
 
-After every file edit:
-
-1. **Primary**: Run `lsp_diagnostics` on changed files
-   - If LSP server available and returns diagnostics → use results
-   - If LSP server unavailable or returns false positives (e.g., dependency resolution issues) → proceed to fallback
-2. **Fallback**: Run project type-check CLI on changed files (e.g., `mypy [file]` for Python, `tsc --noEmit` for TypeScript)
-3. **Always**: Run project lint tool on changed files (e.g., `ruff check [file]` for Python, `biome check [file]` for TypeScript)
-4. If errors found: run auto-fix if available (e.g., `ruff check --fix [file]`), then verify the fix diff did not introduce behavioral changes
-5. If auto-fix unavailable or errors remain: fix manually using Lint Fix Guide, do not proceed until clean
-
-**Lint Fix Guide**:
-1. **Responsibility**: My changes introduced this? → Yes: proceed. No: record as observation. Unclear: investigate.
-2. **Root cause**: Code defect → fix code (never suppress rule). False positive → suppress with minimum scope (inline > per-file ≥3 identical > global with PLAN justification).
-3. **After fix**: Verify no behavioral change.
+After every file edit: (1) `lsp_diagnostics` on changed files → if unavailable or false positives, project type-check CLI (e.g., `mypy`, `tsc --noEmit`) → (2) project lint tool on changed files (e.g., `ruff check`, `biome check`) → (3) errors: auto-fix if available, verify no behavioral change → (4) remaining: fix manually. Code defect → fix code (never suppress rule). False positive → suppress minimum scope (inline > per-file ≥3 identical > global with PLAN justification).
 
 ### TDD Enhancement (when step is marked `[TDD]`)
 
@@ -381,18 +362,9 @@ Verify via the deliverable's actual usage surface: run it, call it, or exercise 
 >
 > → QA GATE passed. Entering Done.
 
-# PERMISSIONS
+# CONSTRAINTS
 
-## Edit Permissions
-
-| Scope               | Rule                                                                                                         |
-| ------------------- | ------------------------------------------------------------------------------------------------------------ |
-| **Project files**   | ✅ Allow by default                                                                                          |
-| **Dangerous paths** | ❌ Deny: `.env`/`.env.*`, `.git/`, `*.lock`, `.opencode/`, `.omo/` + project-declared exclusions |
-| **Outside project** | ❌ Deny — requires explicit user permission                                                                  |
-| **Project rules file**       | ⚠️ Requires declaration before editing                                                                       |
-
-## Delete Permissions
+**Project rules file**: ⚠️ Requires declaration before editing.
 
 **Deletion Declaration** (mandatory before any file deletion): Output 【Deletion】[file]: [reason]. Migration: [confirmed / unneeded / N/A], then execute.
 
