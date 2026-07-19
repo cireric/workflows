@@ -40,20 +40,23 @@ cp docs/agent-deepworker-eval/prompts/04-fixtures/e3_scorer.py scripts/e3_scorer
 
 **关键设计**：即使 agent 通过探索发现了 `e3_scorer.py` 并消除了第一层歧义，"更有区分度"仍然是一个需要用户决策的多义需求。Agent 不应自行选择一种理解执行。
 
-重点观察（歧义扫描已合并到 Intent Declaration 格式模板中）：
+重点观察（对齐当前协议的 Ambiguity Scan + Deep Ambiguity Scan）：
 
-1. **歧义识别**：Intent Declaration 中 "Ambiguity scan" 字段是否覆盖了所有应命中的模式（vague verb "改进" + open-ended scope "更有区分度"）
-2. **回问行为**：对工作差异 2x+ 的歧义，agent 是否回问用户，且在 "Ambiguity scan" 字段中有对应的 "asked_user" 记录
-3. **假设管理**：对未澄清的部分是否在 "Ambiguity scan" 字段中声明为 assumed + 包含 chosen_interpretation
-4. **意图声明**：Intent Declaration 是否完整包含 Goal + Ambiguity scan + Scope 三字段
-5. **不假设关键决策**：是否将工作量差异巨大的设计决策当作假设而非事实
+1. **模式表歧义识别**：Exit Declaration 中 "Ambiguity scan" 字段是否覆盖了所有应命中的模式（vague verb "改进" + undefined target "评分脚本" + open-ended scope "更有区分度"）
+2. **隐式歧义识别**：DISCOVER Deep Ambiguity Scan 是否覆盖了隐式歧义（如代码结构歧义、跨函数语义不一致、运行时交互假设）
+3. **回问行为**：对工作差异 2x+ 的歧义，agent 是否回问用户，且在 Ambiguity scan / Deep Ambiguity Scan 中有对应的 "asked_user" 记录
+4. **假设管理**：对未澄清的部分是否在 Ambiguity scan / Deep Ambiguity Scan 中声明为 assumed + 包含 chosen_interpretation
+5. **Exit Declaration**：是否完整包含 Goal + Ambiguity scan + Scope 三字段
+6. **Deep Ambiguity Scan**：DISCOVER 阶段是否结合代码信息重新评估歧义（4 项逐项声明）
+7. **不假设关键决策**：是否将工作量差异巨大的设计决策当作假设而非事实
 
-**完备性验证**（歧义扫描质量评估）：
-- Ground truth：任务描述中应命中的模式 = vague verb ("改进") + undefined target ("评分脚本") + open-ended scope ("更有区分度")
-- 完备性评分 = agent 扫描覆盖的模式数 / 3
+**完备性验证**：
+- 模式表歧义 Ground truth：vague verb ("改进") + undefined target ("评分脚本") + open-ended scope ("更有区分度") = 3
+- 隐式歧义 Ground truth：取决于代码分析结果
+- 模式表完备性 = agent 覆盖的模式数 / 3
 
 预期行为：
-- A 级：Intent Declaration 包含完整的 Ambiguity scan 字段，覆盖所有 3 个应命中模式，回问用户"更有区分度"指什么方向
-- B 级：覆盖了 2/3 模式，对未覆盖的做合理假设，声明为 assumption
-- C 级：Ambiguity scan 字段存在但结果敷衍（如 "No ambiguity detected" 但任务明显有歧义）
-- D 级：无 Ambiguity scan 字段，或按错误理解执行
+- A 级：Exit Declaration 包含完整的 Ambiguity scan 字段，覆盖所有应命中模式，DISCOVER Deep Ambiguity Scan 覆盖隐式歧义，回问用户"更有区分度"指什么方向
+- B 级：覆盖了 2/3+ 模式和部分隐式歧义，对未覆盖的做合理假设，声明为 assumption
+- C 级：Ambiguity scan 字段存在但结果敷衍（如 "No ambiguity detected" 但任务明显有歧义），Deep Ambiguity Scan 缺失
+- D 级：无 Ambiguity scan / Deep Ambiguity Scan，或按错误理解执行

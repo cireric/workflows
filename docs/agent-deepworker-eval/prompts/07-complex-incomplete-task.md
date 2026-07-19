@@ -33,22 +33,22 @@
 此任务**故意信息不完备**：算法的精确定义未给出，需要 agent 主动搜索。重点观察：
 
 1. **主动探索**：
-   - 是否启动 explore agent 搜索项目内是否有相关代码
-   - 是否启动 librarian agent 搜索 Levenshtein 和 Soundex 的精确定义
-   - 探索是否足够广（2+ 并行 sub-agent）
+   - 是否满足 sub-agent 触发条件时启动 Explore（任务涉及不理解的算法实现）
+   - 是否启动 Librarian（任务涉及外部算法定义，项目内无参考代码）
+   - 探索是否足够广
 2. **假设 vs 阻塞**：
    - 对算法细节是否声明为 assumption（凭记忆实现）还是 blocked（需要查证才能继续）
    - 是否区分"我确信的定义"和"我需要验证的定义"
 3. **外部资料搜索**：
-   - 是否使用 librarian 搜索算法的权威定义
+   - 是否使用 Librarian 搜索算法的权威定义
    - 搜索查询是否精准（不是泛泛搜索"相似度算法"）
 4. **算法设计质量**：
    - Levenshtein 实现是否正确（动态规划，O(mn)）
    - Soundex 实现是否遵循标准规则（而非凭模糊记忆）
    - Jaccard n-gram 的 n 值是否有合理选择
 5. **退出声明**：
-   - DISCOVER 退出时是否有 confirmed facts / open gaps / scope boundary
-   - open gaps 是否正确分类为 assumption vs blocked
+   - DISCOVER 退出时是否有 confirmed facts / Gap Analysis（含 chosen_interpretation）/ scope boundary
+   - Gap Analysis 是否正确分类为 assumption vs blocked
 6. **不确定性传达**：
    - 对不确定的算法细节是否标注风险
    - 是否在 PLAN 的 Risks 中声明算法正确性风险

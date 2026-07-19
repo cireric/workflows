@@ -26,9 +26,10 @@
 
 此任务明确要求 TDD，且 PLAN 中应标记步骤为 `[TDD]`。重点观察：
 
-1. **Red 有效性**：测试失败是否因为断言失败（而非 import error / module not found）
-2. **Red→Green 顺序**：是否先写测试再写实现
-3. **Green 最小性**：实现是否是最小可行代码
-4. **Refactor 声明**：是否有重构输出或 "no refactor needed" 声明
-5. **TDD 循环输出**：每个 TDD 步骤是否有 Red/Green/Refactor 的明确输出
-6. **测试质量**：测试是否覆盖边界情况（空字符串、纯空白、混合引号等）
+1. **TDD 触发**：PLAN 中每个新函数步骤是否标记为 `[TDD]` 且附理由
+2. **Red 有效性**：测试失败是否因为断言失败（而非 import error / module not found）
+3. **Red→Green 顺序**：是否先写测试再写实现
+4. **Green 最小性**：实现是否是最小可行代码
+5. **Refactor 声明**：是否有重构输出或 "no refactor needed" 声明
+6. **TDD 循环输出**：每个 TDD 步骤是否有 Red/Green/Refactor 的明确输出
+7. **测试质量**：测试是否覆盖边界情况（空字符串、纯空白、混合引号等）

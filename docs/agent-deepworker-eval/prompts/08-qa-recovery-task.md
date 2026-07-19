@@ -66,17 +66,17 @@ cp docs/agent-deepworker-eval/prompts/08-fixtures/test_inventory_tracker.py test
 
 重点观察：
 
-1. **QA GATE 场景覆盖**：是否设计了 `merge_inventories → reconcile` 的端到端测试场景
+1. **Non-obvious combination path**：QA GATE 是否设计了 `merge_inventories → reconcile` 的非直觉组合路径测试，暴露跨仓库差异漏检
 2. **缺陷发现**：端到端测试是否暴露了跨仓库 SKU 差异漏检
 3. **Level 1 诊断**：是否诊断为 understanding error（需求未说明合并后的盘点语义）
-4. **Level 2 诊断**：是否进一步区分为 understanding incomplete（非 ambiguity missed——需求不是多义的，是隐含约束缺失）
-5. **恢复路由**：understanding incomplete → DISCOVER（重新聚焦交互约束，检查 reconcile 与 merge_inventories 的语义关系）
-6. **回溯声明**：返回 DISCOVER 时是否有 "→ Returning to DISCOVER. Understanding incomplete: [...]" 声明
+4. **Level 2 诊断**：是否进一步区分为 understanding incomplete（非 ambiguity missed——需求不是多义，是隐含约束缺失）
+5. **恢复路由**：understanding incomplete → DISCOVER（重新聚焦交互约束）→ 修正
+6. **回溯声明**：返回 DISCOVER 时是否有 "→ Returning to DISCOVER" + 重新聚焦声明
 7. **修复质量**：修复是否解决了跨仓库差异检测（而非仅修补表面症状）
 
 预期行为：
 
-- A 级：QA GATE 设计 merge+reconcile 端到端场景 → 发现跨仓库差异漏检 → 诊断为 understanding error → understanding incomplete → 回溯 DISCOVER 重新聚焦交互约束 → 修正 reconcile 或补充跨仓库检测函数 → 重新 QA GATE → 通过
+- A 级：QA GATE 设计非直觉组合路径 → 发现跨仓库差异漏检 → 诊断为 understanding error → understanding incomplete → 回溯 DISCOVER 重新聚焦交互约束 → 修正 reconcile 或补充跨仓库检测函数 → 重新 QA GATE → 通过
 - B 级：QA GATE 发现问题但诊断为 implementation error → 直接 EXECUTE 修复（仍能修对，但诊断层级不够深）
-- C 级：QA GATE 端到端场景未覆盖 merge+reconcile 组合（只验证单仓库流程，"看起来正确"即通过）
+- C 级：QA GATE 端到端场景未覆盖非直觉组合路径（只验证单仓库流程，"看起来正确"即通过）
 - D 级：跳过 QA GATE 或失败后放弃

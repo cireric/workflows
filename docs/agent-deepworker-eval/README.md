@@ -33,15 +33,15 @@ docs/agent-deepworker-eval/
 
 | #   | 维度         | 测试文件                        | 核心问题                                                                                               |
 | --- | ------------ | ------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| 1   | 基础执行     | `01-simple-task.md`             | TODO 铁律是否生效？步骤追踪、单步聚焦、完成标记是否遵守？                                              |
-| 2   | TDD 纪律     | `02-tdd-task.md`                | Red→Green→Refactor 循环是否完整？Red 是否有效（断言失败而非基础设施错误）？                            |
-| 3   | 全链路执行   | `03-explore-task.md`            | DISCOVER→PLAN→EXECUTE→VERIFY→QA GATE 是否完整走通？阶段转换输出是否规范？                              |
-| 4   | 歧义处理     | `04-ambiguous-task.md`          | 两层歧义是否被逐层识别？工作量差异 2x+ 的歧义是否回问用户？假设是否声明？                              |
-| 5   | 交互约束识别 | `05-qa-failure-task.md`         | PLAN Goal 端到端场景是否声明？函数间交互约束是否在 PLAN 阶段识别？                                     |
-| 6   | 约束衰减     | `06-long-chain-task.md`         | 多步骤后约束是否仍然遵守？约束重注入是否在阶段转换时触发？                                             |
-| 7   | 信息不完备   | `07-complex-incomplete-task.md` | 信息不足时是否主动探索？是否合理声明假设 vs 阻塞？是否使用 explore/librarian？                         |
-| 8   | 失败恢复兜底 | `08-qa-recovery-task.md`        | 预置交互约束缺失的 QA GATE 验证：端到端场景是否覆盖函数组合？三层诊断是否正确？恢复路径是否回到 DISCOVER？ |
-| 9   | 隐式歧义发现 | `09-implicit-ambiguity-task.md` | 表面清晰的任务中隐式歧义是否被发现？模式表是否覆盖隐式歧义类型？超越模式表的歧义发现能力？             |
+| 1   | 基础执行     | `01-simple-task.md`             | TODO 铁律是否生效？阶段转换输出是否完整？Post-edit 验证是否执行？                                      |
+| 2   | TDD 纪律     | `02-tdd-task.md`                | TDD 触发决策是否正确？Red→Green→Refactor 循环是否完整？Red 是否有效？                                  |
+| 3   | 全链路执行   | `03-explore-task.md`            | 全部 6 个阶段是否完整走通？阶段转换输出是否规范？Deep Ambiguity Scan 是否执行？                          |
+| 4   | 歧义处理     | `04-ambiguous-task.md`          | 模式表歧义 + 隐式歧义是否被逐层识别？2x+ 差异是否回问用户？Deep Ambiguity Scan 是否覆盖隐式歧义？             |
+| 5   | 交互约束识别 | `05-qa-failure-task.md`         | Implicit Ambiguity Check 是否识别跨函数语义不一致？PLAN 端到端场景是否声明？交互约束是否在 PLAN 阶段识别？ |
+| 6   | 约束衰减     | `06-long-chain-task.md`         | 多步骤后约束是否仍然遵守？TDD 模式纪律是否保持？约束重注入是否在阶段转换时触发？                         |
+| 7   | 信息不完备   | `07-complex-incomplete-task.md` | 信息不足时是否按信息缺口触发 Explore/Librarian？假设是否含 chosen_interpretation？                      |
+| 8   | 失败恢复兜底 | `08-qa-recovery-task.md`        | QA GATE 是否设计了非直觉组合路径？三层诊断是否正确？恢复路径是否回到 DISCOVER？                          |
+| 9   | 隐式歧义发现 | `09-implicit-ambiguity-task.md` | Deep Ambiguity Scan 是否执行？是否补充发现模式表未覆盖的歧义？推理框架是否超越模式表？             |
 
 ## 使用方法
 
@@ -73,6 +73,7 @@ docs/agent-deepworker-eval/
 ## 已知局限
 
 - **模式表语言覆盖**：deepworker 协议的 Ambiguity Scan 模式表当前仅含英文示例（"optimize"、"improve" 等），测试 prompt 使用中文。跨语言测试依赖模型的双语映射能力——模型需将中文模糊词（如"改进"）映射到英文模式类别（如 Vague verb）。更换模型时需评估其跨语言模式识别能力。
+- **v1 vs v2 协议兼容**：v2 协议新增了 Deep Ambiguity Scan（4 项逐项声明）、TDD 触发决策树、Non-obvious combination path、Loop termination、Assumption tracking 等机制。如果评估 v1 协议（无这些机制），维度 9 的部分检查项不适用，按 rubric 中的 v1 兼容规则处理。
 
 ## 附录（新会话运行的提示词）
 

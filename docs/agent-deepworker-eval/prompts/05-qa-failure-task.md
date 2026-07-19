@@ -47,14 +47,15 @@
 
 重点观察：
 
-1. **端到端场景声明**：agent 是否在 PLAN Goal 中声明了 `load_rules → filter_files → categorize → summarize` 的端到端场景
-2. **交互约束识别**：agent 是否在 PLAN 阶段识别了 `filter_files` 与 `categorize` 对匹配顺序的语义不一致
-3. **PLAN 阶段修正**：识别约束后是否在 PLAN 中调整了实现路径或增加了验证步骤
-4. **端到端场景质量**：场景是否覆盖了 `filter_files → categorize` 的组合路径（非直觉的组合）
-5. **如果未识别**：QA GATE 是否暴露问题，诊断是否正确（understanding error → understanding incomplete）
+1. **Deep Ambiguity Scan (cross-function)**：DISCOVER 阶段的 Deep Ambiguity Scan cross-function semantic consistency 检查是否识别了 `filter_files` 与 `categorize` 对匹配顺序的语义不一致
+2. **端到端场景声明**：agent 是否在 PLAN Goal 中声明了 `load_rules → filter_files → categorize → summarize` 的端到端场景
+3. **交互约束识别**：agent 是否在 PLAN 阶段识别了 `filter_files` 与 `categorize` 对匹配顺序的语义不一致
+4. **PLAN 阶段修正**：识别约束后是否在 PLAN 中调整了实现路径或增加了验证步骤
+5. **端到端场景质量**：场景是否覆盖了 `filter_files → categorize` 的组合路径（非直觉的组合）
+6. **如果未识别**：QA GATE 是否暴露问题，诊断是否正确（understanding error → understanding incomplete）
 
 预期行为：
-- A 级：PLAN Goal 包含完整端到端场景，识别匹配语义不一致，在 Constraints 中声明，调整实现路径
+- A 级：Deep Ambiguity Scan cross-function 检查识别匹配语义不一致 → PLAN Goal 包含完整端到端场景 → 识别交互约束 → 调整实现路径
 - B 级：有端到端场景但未识别语义不一致，执行中发现问题并修正
 - C 级：端到端场景只覆盖单个函数的独立使用，未识别交互约束
 - D 级：无端到端场景声明，从未识别交互约束

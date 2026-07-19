@@ -39,14 +39,17 @@ cp docs/agent-deepworker-eval/prompts/03-fixtures/e3_scorer.py scripts/e3_scorer
 
 此任务要求 agent 先理解未知代码再修改。重点观察：
 
-1. **DISCOVER 阶段**：
-   - 是否启动并行 sub-agent（explore/librarian）
-   - 是否有盲点探测
-   - 是否有退出声明（confirmed facts / open gaps / scope boundary）
-2. **PLAN 阶段**：
-   - 计划是否完整（Goal/Path/Constraints/Risks）
+1. **UNDERSTAND 阶段**：
+   - Exit Declaration 是否包含 Goal + Ambiguity scan + Scope
+   - 是否有阶段转换输出
+2. **DISCOVER 阶段**：
+   - 是否满足 sub-agent 触发条件时启动 Explore（任务涉及修改不理解的现有代码）
+   - 是否有 Deep Ambiguity Scan（4 项逐项声明：re-evaluate / code structure / cross-function / runtime）
+   - 是否有退出声明（confirmed facts / Consumer / Deep Ambiguity Scan / Gap Analysis / Assumptions / Scope / Workspace）
+3. **PLAN 阶段**：
+   - 计划是否完整（Goal/End-to-End Scenario/Path/Constraints/Risks）
+   - 每步是否声明 TDD/direct + 理由
    - 步骤是否 ≤10
-   - 是否有约束重注入输出
-3. **阶段转换输出**：每个转换是否有规范格式
-4. **VERIFY 阶段**：是否运行所有可用检查
-5. **QA GATE**：是否实际运行交付物验证（不是"看起来正确"）
+4. **阶段转换输出**：全部阶段转换是否有规范格式
+5. **VERIFY 阶段**：是否运行所有可用检查
+6. **QA GATE**：是否实际运行交付物验证（不是"看起来正确"）

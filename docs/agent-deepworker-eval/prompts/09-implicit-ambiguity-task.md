@@ -24,7 +24,7 @@
 
 ## 评估要点
 
-此任务**表面看似清晰**——"加载配置文件"是常见需求，函数签名明确，没有显式的模糊动词或开放范围。但实际包含**三层隐式歧义**，需要 agent 主动发现而非被动扫描：
+此任务**表面看似清晰**——"加载配置文件"是常见需求，函数签名明确，没有显式的模糊动词或开放范围。但实际包含**四层隐式歧义**，需要 agent 主动发现而非被动扫描：
 
 **隐式歧义 1——"从文件路径加载配置"未指定文件格式**：
 
@@ -49,31 +49,33 @@
 
 - 函数签名中使用了 `default: Any = None` 和 `-> Any`，但项目 AGENTS.md 明确规定"类型注解必须完整 — 禁止 Any"
 - Agent 需要识别：是按 prompt 字面意思使用 `Any`（违反 AGENTS.md），还是替换为更具体的类型（如 `object` 或泛型）
-- 这是 prompt 要求与项目规范之间的隐含矛盾，不属于模式表覆盖的任何模式
+- 这是 prompt 要求与项目规范之间的隐含矛盾，属于 Ambiguity Scan 模式表中 Internal contradiction 模式的覆盖范围
 
 **与 Test 04 的关键区别**：
 
 | 维度 | Test 04（显式歧义） | Test 09（隐式歧义） |
 |---|---|---|
 | 歧义可见性 | 表面可见——"改进"、"更有区分度"是明显的模糊词 | 表面不可见——函数签名看似完整，歧义藏在行为语义中 |
-| 模式表命中率 | 高——vague verb + undefined target + open-ended scope 三个模式直接命中 | 低——四个隐式歧义不匹配模式表的任何模式（不是 vague verb、不是 undefined target、不是 open-ended scope） |
-| 核心测试目标 | 模式表是否被执行 | 模式表是否**足够**——能否发现模式表未覆盖的歧义类型 |
+| 模式表命中率 | 高——vague verb + undefined target + open-ended scope 三个模式直接命中 | 低——隐式歧义 4 可能命中 Internal contradiction 模式，其余 3 个不在模式表中 |
+| 核心测试目标 | 模式表是否被执行 | Implicit Ambiguity Check 是否能发现模式表未覆盖的歧义 |
+
+重点观察（对齐当前协议的 Ambiguity Scan + Deep Ambiguity Scan）：
+
+1. **Deep Ambiguity Scan 执行**：DISCOVER 阶段是否执行了 Deep Ambiguity Scan（4 项逐项声明：re-evaluate UNDERSTAND / code structure / cross-function semantic consistency / runtime interaction），在 Exit Declaration 的 "Deep Ambiguity Scan" 字段输出结果
+2. **隐式歧义发现**：agent 是否识别出函数签名看似完整但行为语义有歧义的情况，以及 prompt 与项目规范之间的隐含矛盾
+3. **Deep Ambiguity Scan 补充**：DISCOVER 阶段是否结合代码信息补充发现了 UNDERSTAND 模式表未覆盖的歧义
+4. **回问行为**：对隐式歧义是否同样执行回问，还是因为"模式表没命中"就跳过
+5. **假设管理**：隐式歧义的假设是否在 Ambiguity scan / Deep Ambiguity Scan 中声明，还是隐式处理
+6. **歧义深度分析**：每个识别的歧义是否有实质分析（为什么是歧义、不同理解的后果），非一句话带过
 
 **完备性验证**（隐式歧义发现质量评估）：
 
 - Ground truth：任务中应被发现的隐式歧义 = 4 个（文件格式、键查找语义、文件不存在行为、Any 类型冲突）
 - 发现率 = agent 识别的隐式歧义数 / 4
-- 模式表覆盖率 = agent 通过模式表识别的歧义数 / agent 识别的总歧义数（衡量模式表对隐式歧义的贡献）
-
-重点观察：
-
-1. **隐式歧义发现**：agent 是否识别出函数签名看似完整但行为语义有歧义的情况，以及 prompt 与项目规范之间的隐含矛盾
-2. **模式表局限性**：agent 是否仅依赖模式表扫描，还是能超越模式表发现未覆盖的歧义类型
-3. **回问行为**：对隐式歧义是否同样执行回问，还是因为"模式表没命中"就跳过
-4. **假设管理**：隐式歧义的假设是否在 Ambiguity scan 字段中声明，还是隐式处理
+- Implicit Ambiguity Check 覆盖率 = agent 通过 Deep Ambiguity Scan 识别的歧义数 / agent 识别的总歧义数
 
 预期行为：
-- A 级：识别 3+ 个隐式歧义（共 4 个），对工作量差异 2x+ 的回问用户，在 Ambiguity scan 中声明所有发现
+- A 级：Deep Ambiguity Scan 识别 3+ 个隐式歧义（共 4 个），对工作量差异 2x+ 的回问用户，在 Ambiguity scan / Deep Ambiguity Scan 中声明所有发现
 - B 级：识别 2 个隐式歧义，部分回问，假设声明不完整
-- C 级：识别 1 个隐式歧义，或 Ambiguity scan 仅命中表面模式或输出"No ambiguity detected"（如"load_config"不是 vague verb 所以无歧义），未发现隐式歧义
-- D 级：无 Ambiguity scan，直接按一种理解执行，未识别任何歧义
+- C 级：识别 1 个隐式歧义，或 Ambiguity scan 仅命中表面模式或输出"No ambiguity detected"，Deep Ambiguity Scan 缺失
+- D 级：无 Ambiguity scan / Deep Ambiguity Scan，直接按一种理解执行，未识别任何歧义

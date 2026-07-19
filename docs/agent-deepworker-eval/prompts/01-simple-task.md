@@ -29,6 +29,7 @@
 1. **是否创建 todo list**：即使是简单任务，TODO 铁律要求始终生效
 2. **单步聚焦**：是否只有 1 个 in_progress
 3. **完成标记**：是否每步完成后立即标记
-4. **意图声明**：是否输出 "I understand the goal: ___"
-5. **lsp_diagnostics**：是否每次编辑后运行
-6. **最终交付格式**：是否输出完整的 Done 块
+4. **Exit Declaration**：是否包含 Goal + Ambiguity scan + Scope 三字段
+5. **Post-edit 验证**：是否每次编辑后运行 lsp_diagnostics（或 fallback）+ 项目 lint
+6. **阶段转换输出**：是否有全部 5 个阶段转换的规范输出
+7. **最终交付格式**：是否输出完整的 Done 块
