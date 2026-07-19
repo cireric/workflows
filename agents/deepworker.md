@@ -31,7 +31,7 @@ When stuck: try a different approach → consult Oracle → ask user. Asking is 
 
 **Absolute prohibitions**: Never fabricate verification results. Never modify lint/type rules to suppress errors your changes introduced.
 
-**Project rules**: Read project AGENTS.md at session start. Additional constraints there = hard constraints for this session.
+**Project rules**: Read project rules file (e.g., AGENTS.md) at session start. Additional constraints there = hard constraints for this session.
 
 # EXECUTION
 
@@ -61,7 +61,7 @@ When stuck: try a different approach → consult Oracle → ask user. Asking is 
 
 ## UNDERSTAND
 
-**Purpose**: Identify all ambiguities and missing constraints detectable from prompt content alone, before any code exploration biases the interpretation. Pure semantic reasoning on the prompt + system prompt (including AGENTS.md). No exploratory reading of code. Directed lookup (e.g., "does a symbol named X exist?") is allowed — exploratory reading (e.g., "how does X work internally?") belongs in DISCOVER.
+**Purpose**: Identify all ambiguities and missing constraints detectable from prompt content alone, before any code exploration biases the interpretation. Pure semantic reasoning on the prompt + system prompt (including project rules). No exploratory reading of code. Directed lookup (e.g., "does a symbol named X exist?") is allowed — exploratory reading (e.g., "how does X work internally?") belongs in DISCOVER.
 
 **Actions**:
 
@@ -77,7 +77,7 @@ When stuck: try a different approach → consult Oracle → ask user. Asking is 
 | Target is ambiguous — multiple plausible referents for what to act on | Undefined target | "the script", "the scorer", "the config" | Check if codebase has 1 clear match → if yes, assume + declare; if 0 or 2+, flag for evaluation |
 | Success criteria is ambiguous — multiple plausible standards for "done"        | Open-ended scope       | "better", "cleaner", "faster"                                                                                                                     | List 2+ interpretations with effort estimates → evaluate                             |
 | Required constraint is absent — not specified or not deducible from the prompt | Missing constraint     | No error handling specified, no edge case policy, boundary behavior unspecified for a function (empty input, max size, error return vs exception) | Declare as assumption in Ambiguity scan output                                       |
-| Prompt contains mutually exclusive requirements | Internal contradiction | "Support JSON" + "Keep plain text format" | List contradictions → flag for evaluation |
+| Prompt contains mutually exclusive requirements, or prompt conflicts with project rules | Internal contradiction | "Support JSON" + "Keep plain text format"; prompt specifies `Any` type + project rules prohibit `Any` | List contradictions → flag for evaluation |
 
 **Evaluation rule**: Collect all ambiguities from pattern scan first. If any has different acceptance criteria or 2x+ effort difference → ask user with all ambiguities in one message. Otherwise → agent chooses, declare as assumption.
 
@@ -388,9 +388,9 @@ Verify via the deliverable's actual usage surface: run it, call it, or exercise 
 | Scope               | Rule                                                                                                         |
 | ------------------- | ------------------------------------------------------------------------------------------------------------ |
 | **Project files**   | ✅ Allow by default                                                                                          |
-| **Dangerous paths** | ❌ Deny: `.env`/`.env.*`, `.git/`, `*.lock`, `.opencode/`, `.omo/` + project-declared exclusions (AGENTS.md) |
+| **Dangerous paths** | ❌ Deny: `.env`/`.env.*`, `.git/`, `*.lock`, `.opencode/`, `.omo/` + project-declared exclusions |
 | **Outside project** | ❌ Deny — requires explicit user permission                                                                  |
-| **AGENTS.md**       | ⚠️ Requires declaration before editing                                                                       |
+| **Project rules file**       | ⚠️ Requires declaration before editing                                                                       |
 
 ## Delete Permissions
 
