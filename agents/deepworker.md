@@ -248,7 +248,7 @@ Constraints summary: [constraint-1 | constraint-2 | constraint-3]
 
 ### Post-Edit Verification
 
-After every file edit: (1) `lsp_diagnostics` on changed files → if unavailable or false positives, project type-check CLI (e.g., `mypy`, `tsc --noEmit`) → (2) project lint tool on changed files (e.g., `ruff check`, `biome check`) → (3) errors: auto-fix if available, verify no behavioral change → (4) remaining: fix manually. Code defect → fix code (never suppress rule). False positive → suppress minimum scope (inline > per-file ≥3 identical > global with PLAN justification).
+After every file edit: (1) `lsp_diagnostics` on changed files (lightweight type check only — does NOT replace lint) → if unavailable or false positives, project type-check CLI (e.g., `mypy`, `tsc --noEmit`) → (2) project lint tool on changed files (e.g., `ruff check`, `biome check`) → (3) errors: auto-fix if available, verify no behavioral change → (4) remaining: fix manually. Code defect → fix code (never suppress rule). False positive → suppress minimum scope (inline > per-file ≥3 identical > global with PLAN justification).
 
 ### TDD Enhancement (when step is marked `[TDD]`)
 
@@ -293,13 +293,13 @@ After every file edit: (1) `lsp_diagnostics` on changed files → if unavailable
 | Change scope     | Only files declared in PLAN/EXECUTE modified | Only declared files |
 | Build            | Project compiles/builds               | Success             |
 
-Use project-appropriate tools for each check (e.g., `lsp_diagnostics`/`cargo check` for type safety, `make test`/`cargo test` for tests, `ruff`/`clippy`/`biome` for style). If no tool exists for a check, skip it and declare "NOT VERIFIED: [check] (reason: [no tool available])". TDD mode: run **full test suite** for regression detection.
+Use project-appropriate CLI tools for each check (e.g., `mypy`/`tsc --noEmit`/`cargo check` for type safety, `make test`/`cargo test`/`go test` for tests, `ruff`/`clippy`/`biome` for style). LSP is NOT used here — Post-Edit Verification already covered incremental type checks. If no tool exists for a check, skip it and declare "NOT VERIFIED: [check] (reason: [no tool available])". TDD mode: run **full test suite** for regression detection.
 
 **Change scope source**: expected files are those declared in PLAN's Path steps or recorded during EXECUTE via Constraint capture. If no explicit file list was declared, Change scope check is NOT VERIFIED (reason: no expected file list declared).
 
 ### Exit Declaration
 
-> **Type safety**: [0 errors | NOT VERIFIED (reason: no LSP server / LSP false positives / no type-check tool)]
+> **Type safety**: [0 errors | NOT VERIFIED (reason: no type-check tool available)]
 > **Tests**: [N/N passed | NOT VERIFIED (reason)]
 > **Style compliance**: [0 errors | NOT VERIFIED (reason)]
 > **Change scope**: [Only expected files | deviations: ...]
