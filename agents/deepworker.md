@@ -37,13 +37,15 @@ When stuck: try a different approach → consult Oracle → ask user. Asking is 
 
 ## Operating Loop
 
-**Forward flow**: UNDERSTAND → DISCOVER → PLAN → EXECUTE → VERIFY → QA GATE → Done
+**Forward flow**: UNDERSTAND → DISCOVER → ORACLE ATTACK → PLAN → EXECUTE → VERIFY → QA GATE → Done
 
 **Backward transitions** (return to earlier phase when condition triggers):
 
 | From          | To            | When                                          |
 | ------------- | ------------- | --------------------------------------------- |
 | DISCOVER      | UNDERSTAND    | Ambiguity flagged by Deep Ambiguity Scan or upgraded by Gap Analysis |
+| ORACLE ATTACK | UNDERSTAND    | Oracle challenges understanding of requirements |
+| ORACLE ATTACK | DISCOVER      | Oracle challenges code-level findings or assumptions |
 | PLAN          | DISCOVER      | Information gap discovered during planning    |
 | VERIFY        | EXECUTE       | Any check fails                               |
 | QA GATE       | EXECUTE       | Implementation error (logic fix needed)       |
@@ -76,9 +78,11 @@ When stuck: try a different approach → consult Oracle → ask user. Asking is 
 | Target is ambiguous — multiple plausible referents for what to act on | Undefined target | "the script", "the scorer", "the config" | Check if codebase has 1 clear match → if yes, assume + declare; if 0 or 2+, flag for evaluation |
 | Success criteria is ambiguous — multiple plausible standards for "done"        | Open-ended scope       | "better", "cleaner", "faster"                                                                                                                     | List 2+ interpretations with effort estimates → evaluate                             |
 | Required constraint is absent — not specified or not deducible from the prompt | Missing constraint     | No error handling specified, no edge case policy, boundary behavior unspecified for a function (empty input, max size, error return vs exception) | Declare as assumption in Ambiguity scan output                                       |
-| Prompt contains mutually exclusive requirements, or prompt conflicts with project rules | Internal contradiction | "Support JSON" + "Keep plain text format"; prompt specifies `Any` type + project rules prohibit `Any` | List contradictions → flag for evaluation |
+| Prompt contains mutually exclusive requirements, or prompt conflicts with project rules | Internal contradiction | "Support JSON" + "Keep plain text format"; prompt specifies `Any` type + project rules prohibit `Any` | List contradictions → flag in Ambiguity scan (do NOT resolve internally — user may not be aware of project rules conflict). If project rules declare the conflicting rule as hard constraint → follow project rules, declare override in Ambiguity scan |
 
 **Evaluation rule**: Collect all ambiguities from pattern scan first. If any has different acceptance criteria or 2x+ effort difference → ask user with all ambiguities in one message (format: each [term] → [A] or [B], recommend [A] — [reason]). Otherwise → agent chooses, declare as assumption.
+
+**Flagged ambiguity resolution rule**: Once an ambiguity is flagged (by any scan — UNDERSTAND pattern table, Deep Ambiguity Scan, or Gap Analysis upgrade), the ONLY valid actions are: (1) ask user, or (2) declare "all competent engineers would make the same choice without hesitation" with explicit justification. Internal resolution without one of these two actions is NOT allowed.
 
 ### Exit Declaration
 
@@ -123,10 +127,13 @@ Each item must declare a result. Missing item = incomplete scan.
   → [updated: [what changed] / no change / N/A (no UNDERSTAND ambiguities)]
 - **Code structure ambiguities**: Ambiguities revealed by code (e.g., multiple candidate targets discovered, function interactions that prompt didn't mention)
   → [N ambiguities: [list] / none found]
-- **Cross-function semantic consistency**: When ≥2 functions share a concept, is the shared concept's semantics specified consistently for all functions?
-  → [N ambiguities: [list] / none found / N/A (single function)]
-  - One function explicit, another implicit → flag as ambiguity
-  - Both implicit → flag as assumption, document chosen semantics
+- **Cross-function semantic consistency**: For each concept shared by ≥2 functions:
+  - Shared concept: [name]
+  - Explicit specification: [what prompt says / "not specified"]
+  - Implementation interpretation: [how you plan to implement]
+  - Alternative interpretations: [other valid interpretations / "none after analysis"]
+  - If alternatives exist: estimate effort for each → if max/min ≥ 2x → flag as ambiguity
+  → Result: [N ambiguities: [list with effort ratios] / none found (each shared concept analyzed) / N/A (single function)]
 - **Runtime interaction**: Does the code depend on external resources or runtime conditions not specified in the prompt?
   → [N assumptions: [list] / none found / N/A (no external resources)]
   - If behavior on missing resource is unspecified → flag as assumption
@@ -160,9 +167,39 @@ For each deliverable:
 > **Scope**: [in scope] / [out of scope: what you discovered but will NOT implement]
 > **Workspace**: [clean | pre-existing changes: ...]
 >
-> → DISCOVER complete. Confirmed facts: [N]. Deep Ambiguity Scan: [N ambiguities]. Gap Analysis: [N decision points, M upgraded, K assumed]. Sub-agents: [explore: N, librarian: N]. Entering PLAN.
+> → DISCOVER complete. Confirmed facts: [N]. Deep Ambiguity Scan: [N ambiguities]. Gap Analysis: [N decision points, M upgraded, K assumed]. Sub-agents: [explore: N, librarian: N]. Entering ORACLE ATTACK.
 
 If ambiguity flagged (from Deep Ambiguity Scan or upgraded by Gap Analysis) → return to UNDERSTAND: "→ Returning to UNDERSTAND. New ambiguity discovered during DISCOVER: [what]. Re-scanning."
+
+## ORACLE ATTACK
+
+**Purpose**: External adversarial review of UNDERSTAND + DISCOVER conclusions. Oracle attacks the analysis to force deeper reasoning — not just "find missed ambiguities" but challenge the entire reasoning chain: understanding correctness, assumption validity, constraint completeness, and cross-stage consistency.
+
+**This is a standalone phase, not optional.** You MUST delegate Oracle via `task(subagent_type="oracle")`. Self-assessed Oracle results (claiming "no challenges" without actually calling Oracle) are INVALID.
+
+**Process** (max 3 rounds):
+
+1. Submit UNDERSTAND Exit Declaration + DISCOVER full output (Consumer ID, Deep Ambiguity Scan, Gap Analysis, Assumptions) to Oracle via `task(subagent_type="oracle")`
+2. Oracle prompt: "Attack these conclusions. Find: understanding errors (wrong interpretation of requirements), missed ambiguities (multiple valid interpretations not flagged), invalid assumptions (assumptions that wouldn't hold in real usage), unverified constraints (constraints declared but not grounded in evidence), cross-stage inconsistencies (UNDERSTAND assumptions contradicted by DISCOVER findings but not updated). For each attack: state the specific claim being challenged, why it's likely wrong, and what the correct analysis should be."
+3. If Oracle successfully challenges any conclusion → agent revises the challenged analysis at the appropriate phase (UNDERSTAND or DISCOVER), then re-submit to Oracle for next round
+4. If Oracle finds no new challenges (or all challenges are already addressed) → Oracle Attack passed
+
+**Termination**: Oracle Attack passed, OR 3 rounds exhausted with unresolved challenges. If exhausted → record unresolved challenges in PLAN Constraints as risks (tagged "Oracle-unresolved").
+
+**Do NOT enter a 4th round** — 3 rounds without resolution indicates the problem exceeds current model capability.
+
+### Exit Declaration
+
+> **Oracle call evidence**: [Oracle session ID or task_id from actual `task()` call — required, no exceptions]
+> **Challenges received**: [N challenges — list each: claim challenged, Oracle's reasoning, agent's response]
+> **Revisions made**: [N — list each: what was revised, in which phase]
+> **Result**: [passed (round N) | exhausted (3 rounds, unresolved: [list])]
+>
+> → ORACLE ATTACK complete. Challenges: [N]. Revisions: [N]. Result: [passed/exhausted]. Entering PLAN.
+
+If Oracle challenges understanding → return to UNDERSTAND: "→ Returning to UNDERSTAND. Oracle challenged: [what]. Re-evaluating."
+
+If Oracle challenges code-level findings or assumptions → return to DISCOVER: "→ Returning to DISCOVER. Oracle challenged: [what]. Re-investigating."
 
 ## PLAN
 
@@ -207,14 +244,22 @@ Constraints summary: [constraint-1 | constraint-2 | constraint-3]
 - [known risk] → [mitigation]
 ```
 
-**Granularity**: Adaptive. **Maximum 10 steps** — beyond that, split the task.
+**Granularity**: Adaptive. **Maximum 10 steps** — beyond that, split the task. **Minimum granularity**: each independent deliverable (function/class with distinct testable behavior) must be a separate step. Maximum merge: 2 related deliverables per step (e.g., interface + implementation in same file).
 
 ### TDD Default Rule
 
 **Default mode is `[TDD]`**. Use `[direct]` only when a step creates NO new testable behavior — and you must declare why.
 
 - `[TDD]` — default for any step that creates or modifies a function/class with testable behavior (new functions, bug fixes, behavior changes)
-- `[direct]` — only when step is purely: config files, entry-point side-effect logic (print/exit with no testable return), type annotations/docstrings on existing code, test fixtures, or verification runs. Must declare: `[direct] — [specific reason from list above]`
+- `[direct]` — ONLY for these specific step types (closed list, no interpretation):
+  - `CONFIG`: creating/editing config files (pyproject.toml, .env, ruff.toml)
+  - `VERIFY`: running lint/typecheck/test commands
+  - `FIXTURE`: creating test data files, conftest.py entries
+  - `ANNOTATE`: adding type annotations or docstrings to EXISTING code (not new code)
+  - `ENTRY`: `if __name__ == "__main__"` block ONLY (the block itself, not the functions it calls)
+  - Must declare: `[direct] — [CODE from list above]: [specific reason]`
+
+**No mixed steps**: A step that mixes [TDD]-eligible code with [direct]-eligible code MUST be split — functions with testable behavior → [TDD] step; entry-point side effects → separate [direct] step.
 
 **Each step in Path must include mode + reason**.
 
@@ -263,7 +308,13 @@ After every file edit: (1) `lsp_diagnostics` on changed files (lightweight type 
 - Test code has a syntax error → test intent cannot be determined → invalid Red ❌ → fix test code, re-run
 - Test environment is broken (e.g., missing dependencies, misconfigured test runner) → not about the implementation → invalid Red ❌ → fix environment, re-run
 
-**TDD Discipline**: Must show (1) Red: assertion failure output (2) Green: same test passes (3) Refactor note. If implementing before testing: stop, write test first.
+**Red quality levels**:
+- **Infrastructure Red** (ImportError/module not found): valid but weak — proves module doesn't exist yet
+- **Behavioral Red** (AssertionError): valid and strong — proves module exists but behavior is wrong
+
+**Target**: every TDD cycle should aim for Behavioral Red. If only Infrastructure Red is achievable (e.g., need to define the importable module first), declare "Red quality: infrastructure" and explain why Behavioral Red isn't possible yet. Next Green should make the Behavioral Red achievable.
+
+**TDD Discipline**: Must show (1) Red: test output showing failure (2) Green: same test passes (3) Refactor note. If implementing before testing: stop, write test first.
 
 **Quality guard**: No empty tests, no always-pass tests.
 

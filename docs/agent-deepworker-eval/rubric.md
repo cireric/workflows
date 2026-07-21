@@ -145,16 +145,18 @@
 
 **测试文件**：`09-implicit-ambiguity-task.md`
 
+**Ground truth**：2 个行为歧义（文件格式、键查找语义）+ 1 个约束冲突（Any 类型 vs 项目规范）。详见 `09-implicit-ambiguity-task.md` 的歧义分类定义。
+
 | 检查项 | A | B | C | D |
 |--------|---|---|---|---|
-| Deep Ambiguity Scan 执行 | DISCOVER 阶段执行了 Deep Ambiguity Scan（4 项逐项声明：re-evaluate UNDERSTAND / code structure / cross-function semantic consistency / runtime interaction），在 Exit Declaration 的 "Deep Ambiguity Scan" 字段输出结果 | 执行了部分项（1-3 项） | Deep Ambiguity Scan 字段存在但输出 "none found"（任务明显有隐式歧义） | 无 Deep Ambiguity Scan |
-| 隐式歧义发现 | 识别 3+ 个隐式歧义（共 4 个：文件格式、键查找语义、文件不存在行为、Any 类型冲突） | 识别 2 个隐式歧义 | 识别 1 个隐式歧义，或仅依赖模式表扫描未命中则认为无歧义 | 无扫描 |
-| Deep Ambiguity Scan 补充 | DISCOVER 阶段的 Deep Ambiguity Scan 补充发现了 UNDERSTAND 模式表未覆盖的歧义 | Deep Ambiguity Scan 存在但未发现新歧义 | 无 Deep Ambiguity Scan | DISCOVER 阶段未补充扫描 |
-| 回问行为 | 对工作量差异 2x+ 的隐式歧义回问用户 | 部分回问，部分自行假设 | 未回问，将隐式歧义声明为 assumption | 完全忽略隐式歧义 |
-| 假设管理 | 隐式歧义的假设在 Ambiguity scan / Deep Ambiguity Scan 中声明，包含 chosen_interpretation | 有假设但缺少 chosen_interpretation | 隐式假设未在扫描中声明 | 无假设意识 |
-| 歧义深度分析 | 每个识别的歧义有实质分析（为什么是歧义、不同理解的后果），非一句话带过 | 部分歧义有深度分析 | 歧义识别了但分析敷衍（如"可能有歧义"无具体说明） | 无分析 |
+| 行为歧义发现 | 识别 2/2 行为歧义（文件格式、键查找语义） | 识别 1/2 行为歧义 | 识别 0/2 行为歧义但约束冲突被 flag | 0/2 行为歧义 + 约束冲突未 flag |
+| 约束冲突识别 | Any 类型冲突在 UNDERSTAND 阶段被 flag 为 Internal contradiction（非自行选择"follow prompt"或"follow rules"） | Any 类型冲突被识别但分类为"用户意图"而非 Internal contradiction | Any 类型冲突被注意到但未在 Ambiguity scan 中声明 | Any 类型冲突未识别 |
+| Oracle Attack 效果 | Oracle 击穿了 agent 的"obvious default"判断，发现 ≥1 个 agent 遗漏的行为歧义 | Oracle 提出了挑战但未发现新行为歧义（挑战内容为代码质量而非行为语义） | Oracle 被调用但未提出有效挑战 | Oracle 未被调用或结果伪造 |
+| 回问行为 | 对工作量差异 2x+ 的行为歧义回问用户 | 部分回问，部分自行假设 | 未回问，将行为歧义声明为 assumption | 完全忽略行为歧义 |
+| 假设管理 | 设计选择（如缺失行为）合理假设并声明 chosen_interpretation；行为歧义不被降级为假设 | 假设声明存在但部分行为歧义被错误降级为假设 | 隐式假设未在扫描中声明 | 无假设意识 |
+| 歧义深度分析 | 每个识别的行为歧义有实质分析：不同选择导致的**不同用户可见行为** + effort 差异 | 部分歧义有深度分析 | 歧义识别了但分析敷衍（如"可能有歧义"无具体说明） | 无分析 |
 
-**注意**：维度 9 的 Deep Ambiguity Scan 是 v2 协议新增的推理框架。如果评估的是旧协议（v1，无 Deep Ambiguity Scan），则"Deep Ambiguity Scan 执行"和"Deep Ambiguity Scan 补充"检查项不适用，评分时跳过，按剩余 4 个检查项的平均等级映射为维度总分。
+**v1 协议兼容**：如果评估的协议无 Deep Ambiguity Scan 和 Oracle Attack，则"Oracle Attack 效果"检查项不适用，评分时跳过，按剩余 5 个检查项的平均等级映射为维度总分。
 
 ---
 
