@@ -39,6 +39,10 @@ When stuck: try a different approach → consult Oracle → ask user. Asking is 
 
 **Forward flow**: UNDERSTAND → DISCOVER → ORACLE ATTACK → PLAN → EXECUTE → VERIFY → QA GATE → Done
 
+**Entry point rule**: All tasks MUST start from UNDERSTAND. No phase may be skipped. If the task prompt references a later phase (e.g., "execute QA GATE"), that phase is the **goal**, not the entry point — you must still traverse all preceding phases.
+
+**Phase skip prohibition**: Skipping a phase is a protocol violation. If you find yourself wanting to skip a phase, execute its minimum required output instead.
+
 **Backward transitions** (return to earlier phase when condition triggers):
 
 | From          | To            | When                                          |
@@ -175,11 +179,11 @@ If ambiguity flagged (from Deep Ambiguity Scan or upgraded by Gap Analysis) → 
 
 **Purpose**: External adversarial review of UNDERSTAND + DISCOVER conclusions. Oracle attacks the analysis to force deeper reasoning — not just "find missed ambiguities" but challenge the entire reasoning chain: understanding correctness, assumption validity, constraint completeness, and cross-stage consistency.
 
-**This is a standalone phase, not optional.** You MUST delegate Oracle via `task(subagent_type="oracle")`. Self-assessed Oracle results (claiming "no challenges" without actually calling Oracle) are INVALID.
+**This is a standalone phase, not optional.** You MUST delegate Oracle (see Sub-agent Delegation). Self-assessed Oracle results (claiming "no challenges" without actually calling Oracle) are INVALID.
 
 **Process** (max 3 rounds):
 
-1. Submit UNDERSTAND Exit Declaration + DISCOVER full output (Consumer ID, Deep Ambiguity Scan, Gap Analysis, Assumptions) to Oracle via `task(subagent_type="oracle")`
+1. Submit UNDERSTAND Exit Declaration + DISCOVER full output (Consumer ID, Deep Ambiguity Scan, Gap Analysis, Assumptions) to Oracle
 2. Oracle prompt: "Attack these conclusions. Find: understanding errors (wrong interpretation of requirements), missed ambiguities (multiple valid interpretations not flagged), invalid assumptions (assumptions that wouldn't hold in real usage), unverified constraints (constraints declared but not grounded in evidence), cross-stage inconsistencies (UNDERSTAND assumptions contradicted by DISCOVER findings but not updated). For each attack: state the specific claim being challenged, why it's likely wrong, and what the correct analysis should be."
 3. If Oracle successfully challenges any conclusion → agent revises the challenged analysis at the appropriate phase (UNDERSTAND or DISCOVER), then re-submit to Oracle for next round
 4. If Oracle finds no new challenges (or all challenges are already addressed) → Oracle Attack passed
@@ -401,6 +405,8 @@ Verify via the deliverable's actual usage surface: run it, call it, or exercise 
 | Environment issue (missing deps, port conflict, service down)? | → Fix environment → re-run QA GATE  |
 
 **Level 2** (understanding error only): Multiple valid interpretations? → UNDERSTAND. One understanding but incomplete? → DISCOVER.
+
+**Post-fix reflection** (mandatory after every QA GATE defect fix): Judge the fix basis — is the fix behavior explicitly required by the prompt/spec, or self-determined? If self-determined (prompt did not specify this semantics), return to DISCOVER to re-evaluate whether this semantics needs to be explicitly defined.
 
 **Safety net**: Max 2 QA GATE failures → Oracle → user.
 
