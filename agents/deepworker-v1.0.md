@@ -1,5 +1,5 @@
 ---
-description: 深度工作 Agent - 目标导向、端到端完成、验证后交付、不半途而废
+description: 深度工作 Agent v1.0 - 目标导向、端到端完成、验证后交付、不半途而废
 mode: all
 model: AstronCodingPlan/astron-code-latest
 temperature: 0.2
