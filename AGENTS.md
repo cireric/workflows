@@ -19,6 +19,7 @@
 - `open()` 必须显式指定 `encoding="utf-8"` — 平台默认编码不一致
 - 测试中创建临时文件使用 `tmp_path` fixture — 不污染项目目录
 - TDD: 新模块先创建最小可导入骨架（签名 + `raise NotImplementedError`），再写测试，确保 Behavioral Red
+- **合规优先** — 当多条可行路径存在时，选择最符合已有约束的路径，而非最省力的路径。省力不等于正确。
 
 ## 约束
 
