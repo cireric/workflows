@@ -99,15 +99,14 @@ Refuted by: [entries, each tagged:]
   2. [reasoning conclusion] (unverifiable: [why only reasoning])
   → At least one verifiable entry required for Refuted by to hold
   → Unverifiable entries serve as supplementary explanation, not independent evidence
+  → **Relevance check**: For each verifiable entry, state what claim it supports
+    and verify the claim matches the Refuted by conclusion. Entry supports "X"
+    but conclusion is "Y" → entry is irrelevant, does not count.
 ```
 
 **Refuted by verifiable evidence rule**: `Refuted by` must cite verifiable facts (file:line or document section), not reasoning conclusions. "The opposing side has no evidence" is NOT a valid refutation — absence of evidence ≠ evidence of absence. At least one verifiable entry is required; unverifiable entries are tagged and cannot independently support Refuted by.
 
-Examples:
-- ✅ "AGENTS.md §运行环境: Python 3.13 (verifiable: AGENTS.md line X)"
-- ✅ "scripts/main.py:42 — key usage is single-level string literal (verifiable: file:line)"
-- ❌ "prompt 没有指定 dot-path → 不是 dot-path (unverifiable: absence of evidence ≠ evidence of absence)"
-- ❌ "flat lookup is the simplest interpretation (unverifiable: engineering judgment, not evidence)"
+**Refuted by relevance rule**: A verifiable entry only counts if it logically supports the Refuted by conclusion. An entry that is factually true but supports a different claim than the one being refuted is **irrelevant** — it does not count toward the "at least one verifiable entry" requirement. This prevents anchoring: the agent finds a true fact related to the topic, then treats it as evidence for a conclusion the fact does not actually support.
 
 ### L2 Mechanisms
 
@@ -203,18 +202,18 @@ Examples:
 Intent: [label list, e.g. implement + investigate]
 Opposing: [most likely missing intent label + why it might apply]
   ↑ Judgment Integrity L1: burden of reversal, preventing anchoring from suppressing alternatives
-Refuted by: [why this label is excluded]
+Refuted by: [entries, each tagged verifiable/unverifiable — see Refuted by rule]
 Goal: [understanding of the task]
 Ambiguity scan:
 - Vague verb: [found: [term] → action | not found]
   Opposing: [if not found: most likely vague verb missed + why it might be overlooked | if found: N/A]
-  Refuted by: [if not found: why excluded | if found: N/A]
+  Refuted by: [if not found: entries, each tagged verifiable/unverifiable — see Refuted by rule | if found: N/A]
 - Undefined target: [found: [term] → action | not found]
   Opposing: [if not found: most likely undefined target missed + why | if found: N/A]
-  Refuted by: [if not found: why excluded | if found: N/A]
+  Refuted by: [if not found: entries, each tagged verifiable/unverifiable — see Refuted by rule | if found: N/A]
 - Open-ended scope: [found: [term] → action | not found]
   Opposing: [if not found: most likely open-ended scope missed + why | if found: N/A]
-  Refuted by: [if not found: why excluded | if found: N/A]
+  Refuted by: [if not found: entries, each tagged verifiable/unverifiable — see Refuted by rule | if found: N/A]
 - Missing constraint: [found: [what] → assumption | not found]
 - Internal contradiction: [found: [what] → flag | not found]
 Scope: [in / out]
@@ -379,10 +378,10 @@ If design choice: chosen_interpretation: [choice] → exhausted scenarios: [list
 
 "User-visible output" includes: return values, raised exceptions, side effects (file writes, network calls, log output). "Same call" means identical arguments passed to the function.
 
-Common patterns:
-- **Input format gap**: parameter type allows broader inputs than prompt uses (e.g., generic path param but prompt only shows one file extension) → different format handling produces different outputs for the same call → behavioral ambiguity
-- **Lookup semantics gap**: key parameter's traversal semantics unspecified (flat vs nested) → different traversal produces different return values for the same key → behavioral ambiguity
-- **Error signaling**: different error reporting mechanisms (raise vs return vs log) for the same failure condition → if all mechanisms achieve the same user-visible goal ("inform the caller that X failed"), this is a design choice, not a behavioral ambiguity
+Common patterns to check for each parameter:
+- **Input format gap**: parameter type allows broader inputs than prompt uses (e.g., generic path param but prompt only shows one file extension) → construct scenario where different format handling produces different outputs for the same call
+- **Lookup semantics gap**: key parameter's traversal semantics unspecified (flat vs nested) → construct scenario where different traversal produces different return values for the same key
+- **Error signaling**: different error reporting mechanisms (raise vs return vs log) for the same failure condition → construct scenario where mechanisms produce different user-visible behavior; if all mechanisms achieve the same user-visible goal, this may be a design choice
 
 **Why construction-first, not observation-first**: Asking "do different choices lead to different outputs?" allows the agent to answer "I don't see a difference" and downgrade to design choice. Requiring the agent to **construct a scenario that produces a difference** flips the burden — the agent must actively try to find a difference, and only when it genuinely cannot (after exhausting plausible scenarios) can it downgrade. This makes the cost of false downgrade (fabricating exhaustion) approach the cost of genuine analysis.
 
@@ -522,12 +521,7 @@ Assumptions tracked: [N items]
 - Behavioral Red (AssertionError): valid and strong — proves module exists but behavior is wrong
 - Target: every TDD cycle should aim for Behavioral Red
 
-**Red validity criterion** (HARD RULE): Valid Red = test expresses intent about implementation, and implementation currently does not satisfy that intent. Invalid Red = test itself is defective and cannot express intent.
-
-- Test intent = "this function should exist and return X" → symbol not found → valid Red ✅
-- Test intent = "this function should return X for input Y" → assertion fails → valid Red ✅
-- Test code has syntax error → intent cannot be determined → invalid Red ❌ → fix test, re-run
-- Test environment broken → not about implementation → invalid Red ❌ → fix environment, re-run
+**Red validity criterion** (HARD RULE): Valid Red = test expresses intent about implementation, and implementation currently does not satisfy that intent. Invalid Red = test itself is defective and cannot express intent. For each Red result, determine: can the test's intent be read from its code? If yes, does the implementation currently fail to satisfy that intent? If both → valid Red. Otherwise → invalid Red, fix the test or environment and re-run.
 
 ### Granularity Rules
 
@@ -655,9 +649,7 @@ failure #1 | approach: [one-sentence description] | error: [failure reason] | me
 **Enforcement rules**:
 
 - failure #1 and #2 with **same** method-category = did not change method, Oracle intervenes early
-- Same-category switch counts as method change **ONLY IF** new method's core mechanism differs from old (not parameter adjustment, not same-type library API style difference)
-  - Does NOT count: `library.requests` → `library.httpx` (same-type HTTP library), parameter tuning, renaming
-  - Does count: `library.requests` → `pattern.caching` (from "direct request" to "cache-first")
+- Same-category switch counts as method change **ONLY IF** new method's core mechanism differs from old (not parameter adjustment, not same-type library API style difference). Ask: does the new method solve the problem in a fundamentally different way, or does it apply the same approach with different parameters?
 - failure #3 → STOP, mandatory Oracle subagent consult
 - After Oracle, #4 still fails → mandatory ask user 1 precise question
 
