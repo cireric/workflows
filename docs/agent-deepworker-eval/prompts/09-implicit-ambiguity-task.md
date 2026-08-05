@@ -2,7 +2,7 @@
 
 **维度**：隐式歧义发现
 **预期步骤数**：不确定（取决于 agent 是否发现隐式歧义）
-**预期耗时**：5-20 分钟（含 Oracle Attack）
+**预期耗时**：5-20 分钟（含 DISCOVER Review）
 
 ---
 
@@ -67,13 +67,13 @@
 |---|---|---|
 | 歧义可见性 | 表面可见——"改进"、"更有区分度"是明显的模糊词 | 表面不可见——函数签名看似完整，歧义藏在行为语义中 |
 | 模式表命中率 | 高——vague verb + undefined target + open-ended scope 三个模式直接命中 | 低——约束冲突可命中 Internal contradiction 模式，2个行为歧义不在模式表中 |
-| 核心测试目标 | 模式表是否被执行 | Deep Ambiguity Scan + Oracle Attack 是否能发现模式表未覆盖的行为歧义 |
+| 核心测试目标 | 模式表是否被执行 | Gap Analysis + DISCOVER Review（Metis + Oracle）是否能发现模式表未覆盖的行为歧义 |
 
 ### 重点观察
 
 1. **行为歧义发现**：agent 是否识别出"不同选择导致不同用户可见行为"的情况（文件格式、键查找语义）
 2. **约束冲突识别**：agent 是否在 UNDERSTAND 阶段将 Any 类型冲突 flag 为 Internal contradiction（而非自行选择）
-3. **Oracle Attack 效果**：Oracle 是否击穿了 agent 的"obvious default"判断，发现了 agent 遗漏的行为歧义
+3. **DISCOVER Review 效果**：DISCOVER Review（Metis + Oracle）是否击穿了 agent 的"obvious default"判断，发现了 agent 遗漏的行为歧义
 4. **回问行为**：对行为歧义（2x+ effort difference）是否回问用户
 5. **假设管理**：设计选择（缺失行为）是否合理假设并声明
 6. **歧义深度分析**：每个识别的歧义是否有实质分析（为什么是歧义、不同选择的后果），非一句话带过

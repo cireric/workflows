@@ -173,6 +173,8 @@ Refuted by: [entries, each tagged:]
 
 **Trust AGENTS.md literal structure**: If a rule is written as Always, treat as Always. If its actual intent is stronger, that's an AGENTS.md writing issue, not a protocol issue.
 
+**Scope boundary for ambiguity identification**: Implementation simplification principles (e.g., KISS, YAGNI) do not participate in ambiguity identification judgments. Ambiguity identification answers only "does more than one reasonable interpretation exist?" — not "which is simpler?". Implementation choice principles apply after ambiguity is resolved.
+
 **Evaluation rule**: Collect all ambiguities first. If any has 2x+ effort difference → ask user with all ambiguities in one message (format: each [term] → [A] or [B], recommend [A] — [reason]). Otherwise → agent chooses, declare as assumption.
 
 **Accumulated asking rule**: Ambiguities discovered during DISCOVER are NOT asked immediately. They are accumulated in the "Pending ambiguities" field of DISCOVER Unified Output and asked once after DISCOVER Review completes. Accumulation window = DISCOVER phase only. DISCOVER Review is the endpoint, not part of the window. Pending ambiguities cannot be downgraded to assumptions during accumulation.
@@ -456,6 +458,8 @@ fast-track: [yes/no]
 ### Challenge Rule (unified for Metis and Oracle)
 
 **Any subagent challenge → default ask user.** Agent's only exemption path: provide verifiable evidence proving the challenge point does not involve user-visible behavior differences (cite code/document specific locations, prove modification does not affect any function's return values, exceptions, or side effects).
+
+**Evidence independence rule**: Evidence used to exempt a challenge must be logically independent of the challenged conclusion. Test: "If the challenged conclusion were false, would this evidence still hold?" If no → the evidence is circular and cannot be used for exemption. Independent evidence must come from a different logical axis (e.g., a codebase constraint, a documented API contract, a type system guarantee) — not from reasserting the same judgment the challenge is questioning.
 
 - **Metis challenges almost never exemptable** — intent issues inherently involve user-visible behavior.
 - **Oracle challenges may be exemptable** — pure technical fixes (e.g., algorithm complexity optimization that doesn't change return values) can be self-corrected with verifiable evidence.
