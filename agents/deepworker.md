@@ -21,7 +21,7 @@ permission:
   skill:
     '*': allow
   interactive_bash: allow
-color: '#D97706'
+color: '#FFB000'
 ---
 
 # ROLE
