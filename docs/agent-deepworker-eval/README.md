@@ -31,17 +31,17 @@ docs/agent-deepworker-eval/
 
 ## 评估维度
 
-| #   | 维度         | 测试文件                        | 核心问题                                                                                               |
-| --- | ------------ | ------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| 1   | 基础执行     | `01-simple-task.md`             | TODO 铁律是否生效？阶段转换输出是否完整？Post-edit 验证是否执行？                                      |
-| 2   | TDD 纪律     | `02-tdd-task.md`                | TDD 触发决策是否正确？Red→Green→Refactor 循环是否完整？Red 是否有效？                                  |
-| 3   | 全链路执行   | `03-explore-task.md`            | 全部 6 个阶段是否完整走通？阶段转换输出是否规范？Deep Ambiguity Scan 是否执行？                          |
-| 4   | 歧义处理     | `04-ambiguous-task.md`          | 模式表歧义 + 隐式歧义是否被逐层识别？2x+ 差异是否回问用户？Deep Ambiguity Scan 是否覆盖隐式歧义？             |
+| #   | 维度         | 测试文件                        | 核心问题                                                                                                   |
+| --- | ------------ | ------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| 1   | 基础执行     | `01-simple-task.md`             | TODO 铁律是否生效？阶段转换输出是否完整？Post-edit 验证是否执行？                                          |
+| 2   | TDD 纪律     | `02-tdd-task.md`                | TDD 触发决策是否正确？Red→Green→Refactor 循环是否完整？Red 是否有效？                                      |
+| 3   | 全链路执行   | `03-explore-task.md`            | 全部 6 个阶段是否完整走通？阶段转换输出是否规范？Deep Ambiguity Scan 是否执行？                            |
+| 4   | 歧义处理     | `04-ambiguous-task.md`          | 模式表歧义 + 隐式歧义是否被逐层识别？2x+ 差异是否回问用户？Deep Ambiguity Scan 是否覆盖隐式歧义？          |
 | 5   | 交互约束识别 | `05-qa-failure-task.md`         | Implicit Ambiguity Check 是否识别跨函数语义不一致？PLAN 端到端场景是否声明？交互约束是否在 PLAN 阶段识别？ |
-| 6   | 约束衰减     | `06-long-chain-task.md`         | 多步骤后约束是否仍然遵守？TDD 模式纪律是否保持？约束重注入是否在阶段转换时触发？                         |
-| 7   | 信息不完备   | `07-complex-incomplete-task.md` | 信息不足时是否按信息缺口触发 Explore/Librarian？假设是否含 chosen_interpretation？                      |
-| 8   | 失败恢复兜底 | `08-qa-recovery-task.md`        | QA GATE 是否设计了非直觉组合路径？三层诊断是否正确？恢复路径是否回到 DISCOVER？                          |
-| 9   | 隐式歧义发现 | `09-implicit-ambiguity-task.md` | Deep Ambiguity Scan 是否执行？是否补充发现模式表未覆盖的歧义？推理框架是否超越模式表？             |
+| 6   | 约束衰减     | `06-long-chain-task.md`         | 多步骤后约束是否仍然遵守？TDD 模式纪律是否保持？约束重注入是否在阶段转换时触发？                           |
+| 7   | 信息不完备   | `07-complex-incomplete-task.md` | 信息不足时是否按信息缺口触发 Explore/Librarian？假设是否含 chosen_interpretation？                         |
+| 8   | 失败恢复兜底 | `08-qa-recovery-task.md`        | QA GATE 是否设计了非直觉组合路径？三层诊断是否正确？恢复路径是否回到 DISCOVER？                            |
+| 9   | 隐式歧义发现 | `09-implicit-ambiguity-task.md` | Deep Ambiguity Scan 是否执行？是否补充发现模式表未覆盖的歧义？推理框架是否超越模式表？                     |
 
 ## 使用方法
 
@@ -86,5 +86,5 @@ docs/agent-deepworker-eval/
 3. 每个测试完成后收集完整 session 输出，写入 .scratch/agent-deepworker-eval-logs/
 4. 每个测试后清理工作区（git checkout + git clean）
 5. 全部完成后按 rubric.md 评分，生成综合报告
-6. 模型标识：astron-code-latest
+6. 模型标识：deepseek-v4-flash
 ```

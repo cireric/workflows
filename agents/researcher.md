@@ -1,7 +1,7 @@
 ---
 description: 研究型 Agent - 理解现实、分析本质、构建知识、设计实验、优化提示词、评估方案
 mode: primary
-model: AstronCodingPlan/xopglm51
+model: opencode-go/deepseek-v4-flash
 temperature: 0.3
 steps: 30
 permission:
