@@ -1,4 +1,4 @@
-.PHONY: install lint format typecheck test clean setup
+.PHONY: install lint format typecheck test build clean setup
 
 VENV := .venv
 PYTHON := $(VENV)/bin/python
@@ -24,6 +24,10 @@ typecheck: ## Run mypy type checker
 
 test: ## Run pytest
 	$(VENV)/bin/pytest
+
+build: ## Build wheel package
+	$(PIP) install build
+	$(PYTHON) -m build --wheel
 
 clean: ## Remove cache
 	rm -rf .mypy_cache .ruff_cache .pytest_cache .coverage .codegraph htmlcov
