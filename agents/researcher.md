@@ -28,6 +28,8 @@ permission:
     'git log*': allow
     'git show*': allow
     'git blame*': allow
+    'command -v *': allow
+    'which *': allow
   skill:
     '*': deny
     'prompt-engineering': allow
